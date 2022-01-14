@@ -9,28 +9,21 @@
         <div class="inputBlock">
           <input type="text" v-model="mainInput" @input="onMainInput" ref="mainInputRef" autofocus>
         </div>
-        <div class="wordsBlock">
-          <div class="prev">
-            {{words[counter - 1]?.point ?? ''}}
-          </div>
-          <div class="current">
-            <span class="done"> {{currentWordDone}} </span>
-            <span class="left"> {{currentWordLeft}} </span>
-          </div>
-          <div class="next">
-            {{words[counter + 1]?.point ?? ''}}
-          </div>
-        </div>
+
         <div class="wordRibbon">
-          <span v-for="(word, index) in words" :key="word.point">
-            <template v-if="index===counter">
-              <span class="done"> {{currentWordDone}} </span>
-              <span class="left"> {{currentWordLeft}} </span>
-            </template>
-            <template v-else>
-              {{word.point}}
-            </template>
-          </span>
+          <div class="window">
+            <div class="ribbonWrapper">
+                        <span :key="word.point" v-for="(word, index) in words">
+              <template v-if="index===counter">
+                <span class="done"> {{currentWordDone}} </span>
+                <span class="left"> {{currentWordLeft}} </span>
+              </template>
+              <template v-else>
+                {{word.point}}
+              </template>
+            </span>
+            </div>
+          </div>
         </div>
         <div class="counter">Осталось: {{words.length - counter}}</div>
       </div>
@@ -63,12 +56,12 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-vars */
+  /* eslint-disable no-unused-vars */
 
-import {ref, nextTick, computed, onMounted} from 'vue'
-import {createWordsArray} from "@/api/words"
+  import {nextTick, ref} from 'vue'
+  import {createWordsArray} from "@/api/words"
 
-export default {
+  export default {
   name: "main",
   components: {},
   props: {},
@@ -252,7 +245,22 @@ export default {
   }
   .wordRibbon {
     .done {
-      color: grey;
+      color: gainsboro;
+    }
+
+    .window {
+      width: 200px;
+      height: 30px;
+      position: relative;
+      margin: 50px auto;
+      border: 1px solid green;
+    }
+
+    .ribbonWrapper {
+      position: absolute;
+      height: 30px;
+      width: 10000px;
+      overflow: hidden;
     }
   }
 }
@@ -260,7 +268,7 @@ export default {
   margin-top: 50px;
 
   .done {
-    color: grey;
+    color: gainsboro;
   }
 }
 
