@@ -12,18 +12,33 @@
 
         <div class="wordRibbon">
           <div class="window">
-            <div class="ribbonWrapper">
-                        <span :key="word.point" v-for="(word, index) in words">
-              <template v-if="index===counter">
-                <span class="done"> {{currentWordDone}} </span>
-                <span class="left"> {{currentWordLeft}} </span>
+            <div class="ribbonWrapper" :style="ribbonStyle">
+              <template v-for="(word, index) in words" :key="word.point">
+                <template v-if="index-counter < -1">
+                  <span class="word" style="opacity:0">{{ word.point }}</span>
+                </template>
+                <template v-else-if="index-counter === -1">
+                  <span class="word" style="opacity:0.4">{{ word.point }}</span>
+                </template>
+                <template v-else-if="index-counter === 0">
+                  <span class="word">
+                    <span class="done"> {{ currentWordDone }} </span>
+                    <span class="left"> {{ currentWordLeft }} </span>
+                  </span>
+                </template>
+                <template v-else-if="index-counter === 1">
+                  <span class="word" style="opacity:0.8">{{ word.point }}</span>
+                </template>
+                <template v-else>
+                  <span class="word" style="display:none">{{ word.point }}</span>
+                </template>
               </template>
-              <template v-else>
-                {{word.point}}
-              </template>
-            </span>
             </div>
           </div>
+        </div>
+        <div class="spaceHand" :class="getSpaceHand">
+          <span class="left">left</span>
+          <span class="right">right</span>
         </div>
         <div class="counter">Осталось: {{words.length - counter}}</div>
       </div>
@@ -58,7 +73,7 @@
 <script>
   /* eslint-disable no-unused-vars */
 
-  import {nextTick, ref} from 'vue'
+  import {nextTick, ref, computed} from 'vue'
   import {createWordsArray} from "@/api/words"
 
   export default {
@@ -66,9 +81,8 @@
   components: {},
   props: {},
   setup() {
-    createWordsArray(10)
+    createWordsArray(50)
             .then( result => {
-              console.log(`result: ${JSON.stringify(result)}`);
               words.value = result
               currentWord = words.value[0]
               currentWordLeft.value = currentWord.point
@@ -106,7 +120,7 @@
             penalty.value.show = true
             penalty.value.wordDone = ''
             penalty.value.word = penalty.value.wordLeft = currentWord.point
-            penalty.value.counter = 1
+            penalty.value.counter = 3
             nextTick(() => {
               penaltyInputRef.value.focus()
             })
@@ -185,6 +199,15 @@
       }
     }
 
+    const ribbonStyle = computed(() => {
+      return `left:${(counter.value > 0 ? document.querySelector(`.ribbonWrapper .word:nth-child(${counter.value + 1})`).offsetLeft * (-1) : 0)}px`
+    })
+
+    const leftSpaceHandChars = ['н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'р', 'о', 'л', 'д', 'ж', 'э', 'т', 'ь', 'б', 'ю']
+    const getSpaceHand = computed(() => {
+      let lastChar = words.value[counter.value]?.point.slice(-2, -1)
+      return ( leftSpaceHandChars.includes(lastChar) ? 'left' : 'right' )
+    })
 
     const addCounter = () => {
       counter.value++
@@ -205,6 +228,8 @@
       onPenaltyInput,
       isFinished,
       errorsQuantity,
+      ribbonStyle,
+      getSpaceHand,
       addCounter
     }
   },
@@ -226,24 +251,15 @@
   }
 
   .inputBlock {
-
-  }
-  .wordsBlock {
-    display: flex;
-    justify-content: space-evenly;
-    margin: 50px;
-    color: grey;
-    font-size: 20px;
-
-    .current {
-      color: black;
-
-      .done {
-        color: grey;
-      }
+    input {
+      width: 200px;
+      height: 30px;
+      font-size: 18px;
     }
   }
+
   .wordRibbon {
+
     .done {
       color: gainsboro;
     }
@@ -253,14 +269,34 @@
       height: 30px;
       position: relative;
       margin: 50px auto;
-      border: 1px solid green;
     }
 
     .ribbonWrapper {
       position: absolute;
       height: 30px;
-      width: 10000px;
+      width: 1000px;
+      text-align: left;
       overflow: hidden;
+      transition: left .2s linear;
+
+    }
+  }
+
+  .spaceHand {
+    width: 300px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+
+    .left, .right {
+      width: 70px;
+      height: 30px;
+    }
+    &.left .left {
+      background: green;
+    }
+    &.right .right {
+      background: green;
     }
   }
 }
