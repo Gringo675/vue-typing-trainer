@@ -62,6 +62,15 @@
 
     <div class="debug">
       DEBUG
+      <div class="wordsRibbon2" id="wordsRibbon">
+        <span class="prev">{{ words[counter-1]?.point}}</span>
+        <span class="active">
+          <span class="done"> {{ currentWordDone }} </span>
+          <span class="left"> {{ currentWordLeft }} </span>
+        </span>
+        <span class="next">{{ words[counter+1]?.point}}</span>
+        <span class="afterNext">{{ words[counter+2]?.point}}</span>
+      </div>
       <div> words: {{ words }}</div>
       <div> counter: {{ counter + 1 }}</div>
       <button @click="addCounter"> counter++</button>
@@ -73,7 +82,7 @@
 <script>
   /* eslint-disable no-unused-vars */
 
-  import {nextTick, ref, computed} from 'vue'
+  import {nextTick, ref, computed, watch} from 'vue'
   import {createWordsArray} from "@/api/words"
 
   export default {
@@ -81,7 +90,7 @@
   components: {},
   props: {},
   setup() {
-    createWordsArray(50)
+    createWordsArray(5)
             .then( result => {
               words.value = result
               currentWord = words.value[0]
@@ -209,6 +218,42 @@
       return ( leftSpaceHandChars.includes(lastChar) ? 'left' : 'right' )
     })
 
+    watch(counter, (counter) => {
+      if (counter > 0) {
+        let wordsRibbon = document.getElementById('wordsRibbon')
+        let prev = wordsRibbon.querySelector('.prev')
+        let active = wordsRibbon.querySelector('.active')
+        let next = wordsRibbon.querySelector('.next')
+        let translate = active.getBoundingClientRect().width * (-1)
+        // начальные значения
+        wordsRibbon.style.transform = 'translateX(0)'
+        prev.style.opacity = 1
+        active.style.opacity = 0.6
+        next.style.opacity = 0
+        setTimeout(() => {
+          // конечные значения
+          wordsRibbon.style.transform = `translateX(${translate}px)`
+          prev.style.opacity = 0
+          active.style.opacity = 1
+          next.style.opacity = 0.6
+          wordsRibbon.classList.add('animation-active')
+          wordsRibbon.addEventListener("transitionend", () => {
+            wordsRibbon.classList.remove('animation-active')
+          }, true);
+        }, 0)
+        // setTimeout(() => {
+        //   wordsRibbon.classList.remove('animation-active')
+        // }, 400)
+
+
+
+        // nextTick(() => {
+        //   wordsRibbon.style.left = '-200px'
+        // })
+      }
+
+    })
+
     const addCounter = () => {
       counter.value++
     }
@@ -300,6 +345,32 @@
     }
   }
 }
+
+.wordsRibbon2 {
+  margin: 20px 0 20px 500px;
+  text-align: left;
+  position: relative;
+
+  &.animation-active {
+    transition: transform .2s linear;
+
+    .prev, .active, .next {
+      transition: opacity .2s linear;
+    }
+  }
+
+  .next {
+    opacity: 0.6;
+  }
+  .afterNext {
+    opacity: 0;
+  }
+
+  .prev, .active .done {
+    color: #87d282;
+  }
+}
+
 .penaltyBlock {
   margin-top: 50px;
 
