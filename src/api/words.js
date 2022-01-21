@@ -6,9 +6,8 @@ export async function createWordsArray(quantity = 100) {
     if (localWords) {
         words = localWords.map( word => {
             return {
-                point: word,
+                val: word,
                 wasError: true,
-                isError: false
             }
         })
     }
@@ -19,9 +18,7 @@ export async function createWordsArray(quantity = 100) {
         for (let wordW of wordsFromWiki) {
             if (!words.some(word => word.point === wordW)) {
                 words.push({
-                    point: wordW + ' ', // добавляем пробел
-                    wasError: false,
-                    isError: false
+                    val: wordW + ' ', // добавляем пробел
                 })
                 if (words.length === quantity) break
             }

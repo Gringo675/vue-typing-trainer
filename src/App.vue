@@ -18,9 +18,7 @@ export default {
 
 #app {
   font-family: 'Play', sans-serif;
-  font-size: 20px;
+  font-size: 22px;
   color: #2c3e50;
-  margin-top: 60px;
-  text-align: center;
 }
 </style>
