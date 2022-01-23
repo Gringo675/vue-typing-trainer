@@ -16,9 +16,10 @@ export async function createWordsArray(quantity = 100) {
     while (words.length < quantity) {
         let wordsFromWiki = await getWordsFromWiki();
         for (let wordW of wordsFromWiki) {
-            if (!words.some(word => word.point === wordW)) {
+            wordW = wordW + ' ' // добавляем пробел
+            if (!words.some(word => word.val === wordW)) {
                 words.push({
-                    val: wordW + ' ', // добавляем пробел
+                    val: wordW ,
                 })
                 if (words.length === quantity) break
             }

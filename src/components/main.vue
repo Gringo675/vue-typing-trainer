@@ -1,270 +1,337 @@
 <template>
-    <vLoader v-if="counter === null"/>
-    <div v-else class="main-wrapper">
-        <h1>Type trainer</h1>
-        <div class="inputBlock">
-            <input type="text" v-model="wordInput" @input="onInput" :class="{ error: activeWord.activeError }"
-                   autofocus>
-        </div>
-        <div class="wordsRibbon" ref="wordsRibbonBlockRef">
-            <span class="prev" :class="{penalty:prevWord.isPenalty}">{{ prevWord.val}}</span>
-            <span class="active" :class="{penalty:activeWord.isPenalty}">
+  <vLoader v-if="counter === null"/>
+  <div v-else class="main-wrapper">
+    <h1>Type trainer</h1>
+    <div class="inputBlock">
+      <div class="leftHand" :class="{ active: activeWord.hand === 'left' }" ></div>
+      <input type="text" v-model="wordInput" @input="onInput" :class="{ error: activeWord.activeError }"
+             autofocus>
+      <div class="rightHand" :class="{ active: activeWord.hand === 'right' }"></div>
+    </div>
+    <div class="wordsRibbon" ref="wordsRibbonBlockRef">
+      <span class="prev" :class="{penalty:prevWord.isPenalty}">{{ prevWord.val }}</span>
+      <span class="active" :class="{penalty:activeWord.isPenalty}">
               <span class="done"> {{ activeWord.done }} </span>
               <span class="left"> {{ activeWord.left }} </span>
             </span>
-            <span class="next" :class="{penalty:nextWord.isPenalty}">{{ nextWord.val}}</span>
-        </div>
-        <div class="infoBlock" :class="getSpaceHand">
-            <span class="leftHand">left</span>
-            <span class="penaltyCounter"> penaltyLeftCounter: {{ penaltyLeftCounter }}</span>
-            <span class="counter"> leftCounter: {{ leftCounter }}</span>
-            <span class="rightHand">right</span>
-        </div>
-
-        <v-finish v-if="leftCounter === 0"/>
+      <span class="next" :class="{penalty:nextWord.isPenalty}">{{ nextWord.val }}</span>
+    </div>
+    <div class="stats">
+      <svg viewBox="0 0 36 36" class="circular-chart">
+        <path class="circle"
+              :class="{penaltyActive: stats.penaltyWords>0}"
+              :stroke-dasharray='(stats.wordsDone/stats.mainWords)*100 + ", 100"'
+              d="M18 2.0845
+      a 15.9155 15.9155 0 0 1 0 31.831
+      a 15.9155 15.9155 0 0 1 0 -31.831"
+        />
+        <text x="18" y="20.35" class="wordsLeft">
+          <tspan>{{ stats.mainWords - stats.wordsDone }}</tspan>
+          <tspan class="penalty">{{ (stats.penaltyWords>0 ? '+' + stats.penaltyWords : '')}}</tspan>
+        </text>
+        <text x="18" y="30" class="errors">{{ (stats.errors>0 ? stats.errors : '')}}</text>
+      </svg>
     </div>
 
-    <div class="debug">
-        DEBUG
-        <div> counter: {{ counter + 1 }}</div>
-        <div> Error: {{ activeWord.activeError }}</div>
-        <button @click="++counter"> ++counter</button>
-    </div>
+    <v-finish />
+  </div>
+
+  <div class="debug">
+    DEBUG
+    <div> stats: {{ stats }}</div>
+    <div> counter: {{ counter + 1 }}</div>
+    <button @click="++counter"> ++counter</button>
+  </div>
 </template>
 
 <script>
-    /* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-vars */
 
-    import vLoader from './loader'
-    import vFinish from './finish'
+import vLoader from './loader'
+import vFinish from './finish'
 
-    import {createWordsArray} from "@/api/words"
+import {createWordsArray} from "@/api/words"
 
-    import {computed, nextTick, ref, watch} from 'vue'
+import {computed, nextTick, ref, watch, onMounted} from 'vue'
 
-    export default {
-        name: "main",
-        components: {vLoader, vFinish},
-        props: {},
-        setup() {
-            createWordsArray(5)
-                .then(result => {
-                    words.value = result
-                    counter.value = 0
-                })
+export default {
+  name: "main",
+  components: {vLoader, vFinish},
+  props: {},
+  setup() {
 
-            let words = ref([])
-            const prevWord = computed(() => {
-                return words.value[counter.value - 1] ?? {}
+    const wordsQuantity = 100
+
+    onMounted( ()=> {
+      createWordsArray(wordsQuantity)
+          .then(result => {
+            words.value = result
+            counter.value = 0
+            stats.value.mainWords = wordsQuantity
+          })
+    })
+
+    let words = ref([])
+    const prevWord = computed(() => {
+      return words.value[counter.value - 1] ?? {}
+    })
+    const activeWord = ref({})
+    const nextWord = computed(() => {
+      return words.value[counter.value + 1] ?? {}
+    })
+    const wordInput = ref('')
+    const counter = ref(null)
+    const stats = ref({
+      mainWords: 0,
+      penaltyWords: 0,
+      errors: 0,
+      wordsDone: 0
+    })
+
+    const wordsRibbonBlockRef = ref(null)
+
+    const leftSpaceHandChars = ['н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'р', 'о', 'л', 'д', 'ж', 'э', 'т', 'ь', 'б', 'ю']
+    watch(counter, (counter) => {
+
+      activeWord.value = words.value[counter] ?? {}
+      activeWord.value.done = ''
+      activeWord.value.left = activeWord.value.val
+
+      let lastChar = activeWord.value.val?.slice(-2, -1)
+      activeWord.value.hand = ( leftSpaceHandChars.includes(lastChar) ? 'left' : 'right' )
+
+      // animation
+      nextTick(() => {
+        const prevWordWidth = wordsRibbonBlockRef.value.querySelector('.prev').getBoundingClientRect().width
+        const activeWordWidth = wordsRibbonBlockRef.value.querySelector('.active').getBoundingClientRect().width
+        wordsRibbonBlockRef.value.style.cssText = `--prevWordWidth: ${prevWordWidth}px;--activeWordWidth: ${activeWordWidth}px`
+        wordsRibbonBlockRef.value.classList.add('animate-counter-enter')
+        setTimeout(() => {
+          wordsRibbonBlockRef.value.classList.remove('animate-counter-enter')
+          wordsRibbonBlockRef.value.classList.add('animate-counter-active')
+          wordsRibbonBlockRef.value.addEventListener("transitionend", () => {
+            wordsRibbonBlockRef.value.classList.remove('animate-counter-active')
+          }, true);
+        }, 0)
+      })
+      if (counter + 1 === words.value.length) { // конец
+        // добавляем "ошибочные" слова в local storage
+        let errors = words.value.filter( item => item.isError && !item.isPenalty ).map(item => item.val)
+        localStorage.setItem('errors', JSON.stringify(errors))
+      }
+    })
+
+    const onInput = () => {
+      const isError = !activeWord.value.val.startsWith(wordInput.value)
+      if (isError) {
+        if (!activeWord.value.isError) { // первая ошибка в слове, добавляем пенальти
+          let penaltyWord = {
+            val: activeWord.value.val,
+            isPenalty: true
+          }
+          let addPenArr = []
+          const penQuantity = ( activeWord.value.isPenalty ? 2 : 3) // для "основного" слова добавляем 3 пенальти, для "пенальти" - 2
+          for (let i = 0; i < penQuantity; i++) {
+            addPenArr.push({
+              val: activeWord.value.val,
+              isPenalty: true
             })
-            const activeWord = ref({})
-            const nextWord = computed(() => {
-                return words.value[counter.value + 1] ?? {}
-            })
-            const wordInput = ref('')
-            const counter = ref(null)
-            const leftCounter = computed(() => {
-                return words.value.length - counter.value
-            })
-            const penaltyLeftCounter = computed(() => {
-                let penaltyCounter = 0
-                for (let i=counter.value; i<words.value.length; i++) {
-                    if (words.value[i].isPenalty) penaltyCounter++
-                }
-                return penaltyCounter
-            })
-            const wordsRibbonBlockRef = ref(null)
+          }
+          words.value.splice(counter.value + 1, 0, ...addPenArr);
+          activeWord.value.isError = true
+          stats.value.penaltyWords = stats.value.penaltyWords + penQuantity
+          ++stats.value.errors
 
-            watch(counter, (counter) => {
+          // animation
+          wordsRibbonBlockRef.value.classList.add('animate-penalty-enter')
+          setTimeout(() => {
+            wordsRibbonBlockRef.value.classList.remove('animate-penalty-enter')
+            wordsRibbonBlockRef.value.classList.add('animate-penalty-active')
+            wordsRibbonBlockRef.value.addEventListener("transitionend", () => {
+              wordsRibbonBlockRef.value.classList.remove('animate-penalty-active')
+            }, true);
+          }, 0)
+        }
 
-                activeWord.value = words.value[counter] ?? {}
-                activeWord.value.done = ''
-                activeWord.value.left = activeWord.value.val
+      } else {
+        activeWord.value.done = wordInput.value
+        activeWord.value.left = activeWord.value.val.slice(activeWord.value.done.length)
 
-                // animation
-                nextTick(() => {
-                    const prevWordWidth = wordsRibbonBlockRef.value.querySelector('.prev').getBoundingClientRect().width
-                    const activeWordWidth = wordsRibbonBlockRef.value.querySelector('.active').getBoundingClientRect().width
-                    wordsRibbonBlockRef.value.style.cssText = `--prevWordWidth: ${prevWordWidth}px;--activeWordWidth: ${activeWordWidth}px`
-                    wordsRibbonBlockRef.value.classList.add('animate-counter-enter')
-                    setTimeout(() => {
-                        wordsRibbonBlockRef.value.classList.remove('animate-counter-enter')
-                        wordsRibbonBlockRef.value.classList.add('animate-counter-active')
-                        wordsRibbonBlockRef.value.addEventListener("transitionend", () => {
-                            wordsRibbonBlockRef.value.classList.remove('animate-counter-active')
-                        }, true);
-                    }, 0)
-                })
-            })
-
-            const onInput = () => {
-                const isError = !activeWord.value.val.startsWith(wordInput.value)
-                if (isError) {
-                    if (!activeWord.value.isError) { // первая ошибка в слове, добавляем пенальти
-                        let penaltyWord = {
-                            val: activeWord.value.val,
-                            isPenalty: true
-                        }
-                        let addPenArr = []
-                        if (!activeWord.value.isPenalty) {  // не пенальти, добавляем 3 раза
-                            for (let i = 0; i < 3; i++) {
-                                addPenArr.push({
-                                    val: activeWord.value.val,
-                                    isPenalty: true
-                                })
-                            }
-                        } else { // пенальти, добавляем 2 раза
-                            for (let i = 0; i < 2; i++) {
-                                addPenArr.push({
-                                    val: activeWord.value.val,
-                                    isPenalty: true
-                                })
-                            }
-                        }
-                        words.value.splice(counter.value + 1, 0, ...addPenArr);
-                        activeWord.value.isError = true
-
-                        // animation
-                        wordsRibbonBlockRef.value.classList.add('animate-penalty-enter')
-                        setTimeout(() => {
-                            wordsRibbonBlockRef.value.classList.remove('animate-penalty-enter')
-                            wordsRibbonBlockRef.value.classList.add('animate-penalty-active')
-                            wordsRibbonBlockRef.value.addEventListener("transitionend", () => {
-                                wordsRibbonBlockRef.value.classList.remove('animate-penalty-active')
-                            }, true);
-                        }, 0)
-                    }
-
-                } else {
-                    activeWord.value.done = wordInput.value
-                    activeWord.value.left = activeWord.value.val.slice(activeWord.value.done.length)
-
-                    if (activeWord.value.left.length === 0) { // next word
-                        wordInput.value = ''
-                        ++counter.value
-                    }
-                }
-                activeWord.value.activeError = isError // флаг ошибки для template
-            }
-
-
-            return {
-                prevWord,
-                activeWord,
-                nextWord,
-                counter,
-                leftCounter,
-                penaltyLeftCounter,
-                wordInput,
-                onInput,
-                wordsRibbonBlockRef
-
-            }
-        },
-        data() {
-            return {}
-        },
-        methods: {},
-        computed: {},
-        watch: {},
-        mounted() {
-        },
+        if (activeWord.value.left.length === 0) { // next word
+          ( activeWord.value.isPenalty ? --stats.value.penaltyWords : ++stats.value.wordsDone )
+          wordInput.value = ''
+          ++counter.value
+        }
+      }
+      activeWord.value.activeError = isError // флаг ошибки для template
     }
+
+
+    return {
+      prevWord,
+      activeWord,
+      nextWord,
+      counter,
+      wordInput,
+      onInput,
+      wordsRibbonBlockRef,
+      stats
+
+    }
+  },
+  data() {
+    return {}
+  },
+  methods: {},
+  computed: {},
+  watch: {},
+  mounted() {
+  },
+}
 </script>
 
 <style lang="scss">
-    .main-wrapper {
-        width: 1000px;
-        margin: auto;
-        display: flex;
-        flex-direction: column;
+.main-wrapper {
+  width: 1000px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
 
-        .inputBlock {
-            align-self: center;
+  .inputBlock {
+    align-self: center;
+    display: flex;
 
-            input, input:focus {
-                width: 270px;
-                font-size: 22px;
-                padding: 5px 10px;
-                border: 2px solid #44f2ff;
-                border-radius: 15px;
-                outline: none;
-            }
-
-            .error {
-                background: pink;
-                box-shadow: 0 0 14px 8px pink;
-            }
-        }
-
-        .wordsRibbon {
-            margin: 20px 0 20px 370px;
-            transform: translateX(calc(var(--prevWordWidth) * -1));
-
-            .prev, .done {
-                color: #87d282;
-            }
-
-            .prev {
-                opacity: 0;
-            }
-
-            .active {
-                opacity: 1;
-            }
-
-            .next {
-                opacity: .6;
-            }
-
-            .penalty {
-                background: yellow;
-            }
-
-            &.animate-counter-enter {
-                transform: translateX(0);
-
-                .prev {
-                    opacity: 1;
-                }
-
-                .active {
-                    opacity: .6;
-                }
-
-                .next {
-                    opacity: 0;
-                }
-            }
-
-            &.animate-counter-active {
-                transition: transform .2s linear;
-
-                .prev, .active, .next {
-                    transition: opacity .2s linear;
-                }
-            }
-
-            &.animate-penalty-enter {
-                transform: translateX(calc((var(--prevWordWidth) + var(--activeWordWidth)) * -1));
-
-                .active {
-                    opacity: 0;
-                }
-            }
-            &.animate-penalty-active {
-                transition: transform .2s linear;
-
-                .active {
-                    transition: opacity .2s linear;
-                }
-            }
-        }
-
-
+    input, input:focus {
+      width: 270px;
+      font-size: 22px;
+      padding: 5px 10px;
+      border: 2px solid #44f2ff;
+      border-radius: 15px;
+      outline: none;
     }
 
-    .debug {
-        margin-top: 50px;
+    .leftHand, .rightHand {
+      width: 40px;
+      height: 40px;
+      margin: 0 20px;
+      border-radius: 50%;
+      background: #fffaed;
+
+      &.active {
+        background: #5bf3ff;
+      }
     }
+
+
+    .error {
+      background: pink;
+      box-shadow: 0 0 14px 8px pink;
+    }
+  }
+
+  .wordsRibbon {
+    margin: 20px 0 20px 370px;
+    transform: translateX(calc(var(--prevWordWidth) * -1));
+    white-space: nowrap;
+
+    .prev, .done {
+      color: #87d282;
+    }
+
+    .prev {
+      opacity: 0;
+    }
+
+    .active {
+      opacity: 1;
+    }
+
+    .next {
+      opacity: .6;
+      display: inline-block;
+    }
+
+    .penalty {
+      background: yellow;
+    }
+
+    &.animate-counter-enter {
+      transform: translateX(0);
+
+      .prev {
+        opacity: 1;
+      }
+
+      .active {
+        opacity: .6;
+      }
+
+      .next {
+        opacity: 0;
+      }
+    }
+
+    &.animate-counter-active {
+      transition: transform .2s linear;
+
+      .prev, .active, .next {
+        transition: opacity .2s linear;
+      }
+    }
+
+    &.animate-penalty-enter {
+      .next {
+        transform: translateX(calc(var(--activeWordWidth) * -1));
+        opacity: 0;
+      }
+    }
+
+    &.animate-penalty-active {
+      .next {
+        transition: transform .2s linear, opacity .2s linear;
+      }
+    }
+  }
+
+  .stats {
+    .circular-chart {
+      display: block;
+      margin: 10px auto;
+      width: 200px;
+    }
+
+    .circle {
+      stroke: #4CC790;
+      fill: #c5ffe5;
+      stroke-width: 1.4;
+      stroke-linecap: round;
+
+      &.penaltyActive {
+        stroke: yellow;
+      }
+    }
+
+    .wordsLeft {
+      fill: #8371a6;
+      font-size: .5em;
+      text-anchor: middle;
+
+      .penalty {
+        fill: #eebf54;
+      }
+    }
+
+    .errors {
+      fill: #e75576;
+      font-size: .4em;
+      text-anchor: middle;
+    }
+  }
+
+
+}
+
+.debug {
+  margin-top: 50px;
+}
 </style>
