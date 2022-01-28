@@ -1,10 +1,21 @@
 <template>
+  <vSettings v-if="settings.show"
+             :settings="settings"
+             @updateSettings="onUpdateSettings"
+  />
   <vLoader v-if="counter === null"/>
   <div v-else class="main-wrapper">
-    <h1>Type trainer</h1>
+    <div class="headerBlock">
+      <h1>Type trainer</h1>
+      <span class="settingsButton">
+        <img class="icon" @click="settings.show = !settings.show"
+             :src="require(`@/assets/settings-icon.png`)"
+             alt="">
+      </span>
+    </div>
     <div class="inputBlock">
       <div class="leftHand" :class="{ active: activeWord.hand === 'left' }" ></div>
-      <input type="text" v-model="wordInput" @input="onInput" :class="{ error: activeWord.activeError }"
+      <input type="text" v-model="wordInput" @input="onInput" @keydown="onKeydown" :class="{ error: activeWord.activeError }"
              autofocus>
       <div class="rightHand" :class="{ active: activeWord.hand === 'right' }"></div>
     </div>
@@ -49,6 +60,7 @@
 
 import vLoader from './loader'
 import vFinish from './finish'
+import vSettings from './settings'
 
 import {createWordsArray} from "@/api/words"
 
@@ -56,18 +68,32 @@ import {computed, nextTick, ref, watch, onMounted} from 'vue'
 
 export default {
   name: "main",
-  components: {vLoader, vFinish},
+  components: {vLoader, vFinish, vSettings},
   props: {},
   setup() {
 
-    const wordsQuantity = 100
-
+    const settings = ref({
+      wordsQuantity: 10,
+      addUpperCase: false,
+      addNumbers: false,
+      addSymbols: false,
+      show: false
+    })
+    const onUpdateSettings = (value)=> {
+      console.log(`onUpdateSettings: ${value}`);
+    }
     onMounted( ()=> {
-      createWordsArray(wordsQuantity)
+      createWordsArray(settings.value)
           .then(result => {
             words.value = result
             counter.value = 0
-            stats.value.mainWords = wordsQuantity
+            stats.value.mainWords = settings.value.wordsQuantity
+
+              let aaa = ''
+              words.value.forEach((word) => {
+                  aaa = aaa + word.val + '   '
+              })
+              console.log(`aaa: ${aaa}`);
           })
     })
 
@@ -166,6 +192,14 @@ export default {
       activeWord.value.activeError = isError // флаг ошибки для template
     }
 
+    const onKeydown = (event) => {
+      // обрабатываем нажатие Tab (заменяем на пробел)
+      if (event.key === 'Tab') {
+        event.preventDefault()
+        wordInput.value += ' '
+        onInput()
+      }
+    }
 
     return {
       prevWord,
@@ -174,9 +208,11 @@ export default {
       counter,
       wordInput,
       onInput,
+      onKeydown,
       wordsRibbonBlockRef,
-      stats
-
+      stats,
+      settings,
+      onUpdateSettings
     }
   },
   data() {
@@ -196,6 +232,17 @@ export default {
   margin: auto;
   display: flex;
   flex-direction: column;
+
+  .headerBlock {
+    display: flex;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+
+    .settingsButton .icon {
+      cursor: pointer;
+    }
+  }
 
   .inputBlock {
     align-self: center;
@@ -335,3 +382,5 @@ export default {
   margin-top: 50px;
 }
 </style>
+
+hec утп eng ооол yjdsq

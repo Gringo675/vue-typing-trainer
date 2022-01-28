@@ -1,4 +1,7 @@
-export async function createWordsArray(quantity = 100) {
+export async function createWordsArray(settings) {
+
+    // eslint-disable-next-line no-unused-vars
+    const { wordsQuantity, addNumbers, addSymbols } = settings
 
     let words = [] // result
 
@@ -13,7 +16,7 @@ export async function createWordsArray(quantity = 100) {
     }
 
     // остальное добираем из wiki
-    while (words.length < quantity) {
+    while (words.length < wordsQuantity) {
         let wordsFromWiki = await getWordsFromWiki();
         for (let wordW of wordsFromWiki) {
             wordW = wordW + ' ' // добавляем пробел
@@ -21,7 +24,7 @@ export async function createWordsArray(quantity = 100) {
                 words.push({
                     val: wordW ,
                 })
-                if (words.length === quantity) break
+                if (words.length === wordsQuantity) break
             }
         }
     }
