@@ -1,16 +1,18 @@
 <template>
-  <vSettings v-if="settings.show"
-             :settings="settings"
-             @updateSettings="onUpdateSettings"
-  />
   <vLoader v-if="counter === null"/>
   <div v-else class="main-wrapper">
     <div class="headerBlock">
       <h1>Type trainer</h1>
       <span class="settingsButton">
-        <img class="icon" @click="settings.show = !settings.show"
+        <img class="icon" :class="{rotate: settings.show}" @click="settings.show = !settings.show"
              :src="require(`@/assets/settings-icon.png`)"
              alt="">
+          <transition name="rotate-y">
+            <vSettings v-if="settings.show"
+                       :settings="settings"
+                       @updateSettings="onUpdateSettings"
+            />
+          </transition>
       </span>
     </div>
     <div class="inputBlock">
@@ -79,23 +81,47 @@ export default {
       addSymbols: false,
       show: false
     })
-    const onUpdateSettings = (value)=> {
-      console.log(`onUpdateSettings: ${value}`);
-    }
+
     onMounted( ()=> {
+      // читаем настройки из local storage
+      let localSettings = JSON.parse(localStorage.getItem('settings'))
+      if (localSettings) settings.value = localSettings
+      // console.log(`localSettings: ${JSON.stringify(localSettings)}`);
+      // создаем words
+      createWords()
+    })
+
+    const onUpdateSettings = (newSettings)=> {
+      // убираем свойство show и сохраняем в local storage
+      delete newSettings.show
+      localStorage.setItem('settings', JSON.stringify(newSettings))
+      // принимаем новые значения
+      settings.value = newSettings
+      // пересоздаем words
+      createWords()
+      // console.log(`settings.value: ${JSON.stringify(settings.value)}`);
+    }
+
+    const createWords = ()=> {
+      stats.value = {
+        mainWords: 0,
+        penaltyWords: 0,
+        errors: 0,
+        wordsDone: 0
+      }
       createWordsArray(settings.value)
           .then(result => {
             words.value = result
             counter.value = 0
             stats.value.mainWords = settings.value.wordsQuantity
-
-              let aaa = ''
-              words.value.forEach((word) => {
-                  aaa = aaa + word.val + '   '
-              })
-              console.log(`aaa: ${aaa}`);
+            console.log(`words.value.length: ${words.value.length}`);
+            // let aaa = ''
+            // words.value.forEach((word) => {
+            //     aaa = aaa + word.val + '   '
+            // })
+            // console.log(`aaa: ${aaa}`);
           })
-    })
+    }
 
     let words = ref([])
     const prevWord = computed(() => {
@@ -239,9 +265,20 @@ export default {
     justify-content: space-between;
     align-items: center;
 
-    .settingsButton .icon {
-      cursor: pointer;
+    .settingsButton {
+      position: relative;
+
+      .icon {
+        cursor: pointer;
+        transform: rotate(0);
+        transition: transform .3s linear;
+
+        &.rotate {
+          transform: rotate(90deg);
+        }
+      }
     }
+
   }
 
   .inputBlock {
@@ -377,10 +414,18 @@ export default {
 
 
 }
-
+.rotate-y-enter-active, .rotate-y-leave-active {
+  transition: transform .3s linear, opacity .3s linear;
+}
+.rotate-y-enter-from, .rotate-y-leave-to {
+  transform: rotateY(90deg);
+  opacity: .3;
+}
+.rotate-y-enter-to, .rotate-y-leave-from {
+  transform: rotateY(0);
+  opacity: 1;
+}
 .debug {
   margin-top: 50px;
 }
 </style>
-
-hec утп eng ооол yjdsq

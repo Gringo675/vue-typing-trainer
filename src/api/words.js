@@ -2,7 +2,8 @@ export async function createWordsArray(settings) {
 
     // eslint-disable-next-line no-unused-vars
     const { wordsQuantity, addNumbers, addSymbols } = settings
-
+    console.log(`wordsQuantity: ${wordsQuantity}`);
+    console.log(typeof 'wordsQuantity');
     let words = [] // result
 
     let localWords = JSON.parse(localStorage.getItem('errors')) // получаем из local storage сохраненные "ошибочные" слова
@@ -14,7 +15,7 @@ export async function createWordsArray(settings) {
             }
         })
     }
-
+    console.log(`words.length: ${words.length}`);
     // остальное добираем из wiki
     while (words.length < wordsQuantity) {
         let wordsFromWiki = await getWordsFromWiki();
@@ -24,7 +25,8 @@ export async function createWordsArray(settings) {
                 words.push({
                     val: wordW ,
                 })
-                if (words.length === wordsQuantity) break
+                console.log(`words.length: ${words.length}`);
+                if (words.length == wordsQuantity) break
             }
         }
     }

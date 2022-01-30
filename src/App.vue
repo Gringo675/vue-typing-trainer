@@ -20,5 +20,6 @@ export default {
   font-family: 'Play', sans-serif;
   font-size: 22px;
   color: #2c3e50;
+  perspective: 500px;
 }
 </style>
