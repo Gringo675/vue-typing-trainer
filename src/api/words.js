@@ -1,9 +1,7 @@
 export async function createWordsArray(settings) {
 
     // eslint-disable-next-line no-unused-vars
-    const { wordsQuantity, addNumbers, addSymbols } = settings
-    console.log(`wordsQuantity: ${wordsQuantity}`);
-    console.log(typeof 'wordsQuantity');
+    const { wordsQuantity, addUpperCase, addNumbers, addSymbols } = settings
     let words = [] // result
 
     let localWords = JSON.parse(localStorage.getItem('errors')) // получаем из local storage сохраненные "ошибочные" слова
@@ -15,17 +13,26 @@ export async function createWordsArray(settings) {
             }
         })
     }
-    console.log(`words.length: ${words.length}`);
+
+    if (addNumbers) {
+        // 10% от общего колическтва
+        for (let i=0; i < wordsQuantity*0.1; i++) {
+            words.push({
+                val: randomInteger(10, 9999).toString() + ' '
+            })
+        }
+    }
     // остальное добираем из wiki
     while (words.length < wordsQuantity) {
         let wordsFromWiki = await getWordsFromWiki();
         for (let wordW of wordsFromWiki) {
             wordW = wordW + ' ' // добавляем пробел
-            if (!words.some(word => word.val === wordW)) {
+            if (!words.some(word => word.val.toLowerCase() === wordW)) {
+                // если выбрана опция, с вероятностью 20% делаем первую букву заглавной
+                if (addUpperCase && Math.random() < 0.20)  wordW = wordW[0].toUpperCase() + wordW.slice(1)
                 words.push({
                     val: wordW ,
                 })
-                console.log(`words.length: ${words.length}`);
                 if (words.length == wordsQuantity) break
             }
         }
@@ -56,4 +63,10 @@ function shuffle(array) {
         let j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
+}
+
+function randomInteger(min, max) {
+    // случайное число от min до (max+1)
+    let rand = min + Math.random() * (max + 1 - min);
+    return Math.floor(rand);
 }

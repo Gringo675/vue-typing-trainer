@@ -114,12 +114,11 @@ export default {
             words.value = result
             counter.value = 0
             stats.value.mainWords = settings.value.wordsQuantity
-            console.log(`words.value.length: ${words.value.length}`);
-            // let aaa = ''
-            // words.value.forEach((word) => {
-            //     aaa = aaa + word.val + '   '
-            // })
-            // console.log(`aaa: ${aaa}`);
+            let aaa = ''
+            words.value.forEach((word) => {
+                aaa = aaa + word.val + '   '
+            })
+            console.log(`words: ${aaa}`);
           })
     }
 
