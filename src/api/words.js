@@ -1,12 +1,12 @@
 export async function createWordsArray(settings) {
 
     // eslint-disable-next-line no-unused-vars
-    const { wordsQuantity, addUpperCase, addNumbers, addSymbols } = settings
+    const {wordsQuantity, addUpperCase, addNumbers, addSymbols} = settings
     let words = [] // result
 
     let localWords = JSON.parse(localStorage.getItem('errors')) // получаем из local storage сохраненные "ошибочные" слова
     if (localWords) {
-        words = localWords.map( word => {
+        words = localWords.map(word => {
             return {
                 val: word,
                 wasError: true,
@@ -16,9 +16,33 @@ export async function createWordsArray(settings) {
 
     if (addNumbers) {
         // 10% от общего колическтва
-        for (let i=0; i < wordsQuantity*0.1; i++) {
+        for (let i = 0; i < wordsQuantity * 0.1; i++) {
+            let wordN = randomInteger(10, 9999)
+            if (addSymbols) {
+                let random = Math.random() // от 0 до 1
+                switch (true) {
+                    case (random > .2 && random < .25):
+                        wordN = wordN + '*'
+                        break
+                    case (random > .25 && random < .3):
+                        wordN = wordN + '+'
+                        break
+                    case (random > .3 && random < .35):
+                        wordN = wordN + '='
+                        break
+                    case (random > .35 && random < .4):
+                        wordN = wordN + '%'
+                        break
+                    case (random > .4 && random < .45):
+                        wordN = wordN + '/'
+                        break
+                    case (random > .45 && random < .5):
+                        wordN = '№' + wordN
+                        break
+                }
+            }
             words.push({
-                val: randomInteger(10, 9999).toString() + ' '
+                val: wordN + ' '
             })
         }
     }
@@ -26,12 +50,47 @@ export async function createWordsArray(settings) {
     while (words.length < wordsQuantity) {
         let wordsFromWiki = await getWordsFromWiki();
         for (let wordW of wordsFromWiki) {
-            wordW = wordW + ' ' // добавляем пробел
-            if (!words.some(word => word.val.toLowerCase() === wordW)) {
+            // проверяем на совпадение с уже присутствующими
+            if (!words.some(word => {
+                let regMatch = word.val.match(/[а-яё-]+/i)
+                if (regMatch) return regMatch[0].toLowerCase() === wordW
+                return false
+            })) {
+                let random = Math.random() // от 0 до 1
                 // если выбрана опция, с вероятностью 20% делаем первую букву заглавной
-                if (addUpperCase && Math.random() < 0.20)  wordW = wordW[0].toUpperCase() + wordW.slice(1)
+                if (addUpperCase && random < 0.20) wordW = wordW[0].toUpperCase() + wordW.slice(1)
+                // дабавляем символы
+                if (addSymbols) {
+                    switch (true) {
+                        case (random > .2 && random < .25):
+                            wordW = wordW + '.'
+                            break
+                        case (random > .25 && random < .3):
+                            wordW = wordW + ','
+                            break
+                        case (random > .3 && random < .35):
+                            wordW = wordW + '!'
+                            break
+                        case (random > .35 && random < .4):
+                            wordW = wordW + ';'
+                            break
+                        case (random > .4 && random < .45):
+                            wordW = wordW + ':'
+                            break
+                        case (random > .45 && random < .5):
+                            wordW = wordW + '?'
+                            break
+                        case (random > .5 && random < .55):
+                            wordW = '"' + wordW + '"'
+                            break
+                        case (random > .55 && random < .6):
+                            wordW = '(' + wordW + ')'
+                            break
+                    }
+                }
+                wordW = wordW + ' ' // добавляем пробел
                 words.push({
-                    val: wordW ,
+                    val: wordW,
                 })
                 if (words.length == wordsQuantity) break
             }

@@ -75,7 +75,7 @@ export default {
   setup() {
 
     const settings = ref({
-      wordsQuantity: 10,
+      wordsQuantity: 100,
       addUpperCase: false,
       addNumbers: false,
       addSymbols: false,
@@ -141,7 +141,7 @@ export default {
 
     const wordsRibbonBlockRef = ref(null)
 
-    const leftSpaceHandChars = ['н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'р', 'о', 'л', 'д', 'ж', 'э', 'т', 'ь', 'б', 'ю']
+    const leftSpaceHandChars = ['н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'р', 'о', 'л', 'д', 'ж', 'э', 'т', 'ь', 'б', 'ю', '7', '8', '9', '0', '-', '=', '+', '_', ')', '(', '*', '?', '/', '\\']
     watch(counter, (counter) => {
 
       activeWord.value = words.value[counter] ?? {}

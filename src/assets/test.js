@@ -1,17 +1,6 @@
-let aaa = [
-    {
-        item: 'aaa',
-        isError: false
-    },
-    {
-        item: 'bbb',
-        isError: true
-    }
-]
+let aaa = 'Слово. '
 
-let bbb = aaa[1]
-bbb.newProp = 'ttt'
-bbb.isError = false
+let bbb = aaa.match(/[а-яё-]+/i)[0].toLowerCase()
 
-console.log(`bbb: ${JSON.stringify(bbb)}`);
-console.log(`aaa[1]: ${JSON.stringify(aaa[1])}`);
+console.log(`bbb: ${bbb}`);
+console.log(`type: ${typeof bbb}`);
