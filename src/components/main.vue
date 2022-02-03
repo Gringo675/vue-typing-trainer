@@ -7,7 +7,7 @@
         <img class="icon" :class="{rotate: settings.show}" @click="settings.show = !settings.show"
              :src="require(`@/assets/settings-icon.png`)"
              alt="">
-          <transition name="rotate-y">
+          <transition name="pop-up">
             <vSettings v-if="settings.show"
                        :settings="settings"
                        @updateSettings="onUpdateSettings"
@@ -290,7 +290,6 @@ export default {
       padding: 5px 10px;
       border: 2px solid #44f2ff;
       border-radius: 15px;
-      outline: none;
     }
 
     .leftHand, .rightHand {
@@ -424,6 +423,23 @@ export default {
   transform: rotateY(0);
   opacity: 1;
 }
+
+.pop-up-enter-active, .pop-up-leave-active {
+  transition: all .3s linear;
+}
+.pop-up-enter-from, .pop-up-leave-to {
+  transform: translateY(-40px) scale(0.1) skewY(-30deg);
+  transform-origin: 100% 0;
+  opacity: .1;
+
+}
+.pop-up-enter-to, .pop-up-leave-from {
+  transform: none;
+  transform-origin: 100% 0;
+  opacity: 1;
+}
+
+
 .debug {
   margin-top: 50px;
 }

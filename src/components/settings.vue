@@ -1,79 +1,198 @@
 <template>
-  <div class="settingsBlock">
-    <div>
-      <span>Количество</span>
-      <input type="text" v-model="newSettings.wordsQuantity">
+    <div class="settingsBlock">
+      <div class="quantityBlock">
+        <span class="name">Количество</span>
+        <span class="quantity">
+          <input type="text" v-model="newSettings.wordsQuantity">
+        </span>
+      </div>
+
+        <div class="switcherBlock">
+            <span class="name">Заглавные</span>
+            <span class="switcher">
+              <input type="checkbox" id="upperCase" v-model="newSettings.addUpperCase">
+              <label for="upperCase"></label>
+            </span>
+        </div>
+        <div class="switcherBlock">
+            <span class="name">Цифры</span>
+            <span class="switcher">
+              <input type="checkbox" id="numbers" v-model="newSettings.addNumbers">
+              <label for="numbers"></label>
+            </span>
+        </div>
+        <div class="switcherBlock">
+            <span class="name">Символы</span>
+            <span class="switcher">
+              <input type="checkbox" id="symbols" v-model="newSettings.addSymbols">
+              <label for="symbols"></label>
+            </span>
+        </div>
+
     </div>
-    <div>
-      <span>Добавить заглавные</span>
-      <input type="checkbox" v-model="newSettings.addUpperCase">
-    </div>
-    <div>
-      <span>Добавить цифры</span>
-      <input type="checkbox" v-model="newSettings.addNumbers">
-    </div>
-    <div>
-      <span>Добавить символы</span>
-      <input type="checkbox" v-model="newSettings.addSymbols">
-    </div>
-  </div>
 </template>
 
 <script>
 
-// eslint-disable-next-line no-unused-vars
-import {ref, onBeforeUnmount} from 'vue'
+    // eslint-disable-next-line no-unused-vars
+    import {onBeforeUnmount, ref} from 'vue'
 
-export default {
-  name: "settings",
-  components: {},
-  props: {
-    settings: {
-      type: Object,
+    export default {
+        name: "settings",
+        components: {},
+        props: {
+            settings: {
+                type: Object,
+            }
+        },
+        setup(props, {emit}) {
+            // let quantity = ref(props.settings.wordsQuantity)
+            // const newSettings =   ref(props.settings)
+            // const newSettings = toRef(props, 'settings')
+            const newSettings = ref({...props.settings})
+
+            onBeforeUnmount(() => {
+                // console.log(`props.settings: ${JSON.stringify(props.settings)}`);
+                // console.log(`newSettings: ${JSON.stringify(newSettings.value)}`);
+                // if (JSON.stringify(newSettings.value) != JSON.stringify(props.settings)) emit('updateSettings', newSettings.value)
+                if (newSettings.value.wordsQuantity !== props.settings.wordsQuantity ||
+                    newSettings.value.addUpperCase !== props.settings.addUpperCase ||
+                    newSettings.value.addNumbers !== props.settings.addNumbers ||
+                    newSettings.value.addSymbols !== props.settings.addSymbols) emit('updateSettings', newSettings.value)
+            })
+
+            return {
+                newSettings
+            }
+        },
+        data() {
+            return {}
+        },
+        methods: {},
+        computed: {},
+        watch: {},
+        mounted() {
+        },
     }
-  },
-  setup(props, {emit}) {
-    // let quantity = ref(props.settings.wordsQuantity)
-    // const newSettings =   ref(props.settings)
-    // const newSettings = toRef(props, 'settings')
-    const newSettings =   ref({...props.settings})
-
-    onBeforeUnmount(() => {
-      // console.log(`props.settings: ${JSON.stringify(props.settings)}`);
-      // console.log(`newSettings: ${JSON.stringify(newSettings.value)}`);
-      // if (JSON.stringify(newSettings.value) != JSON.stringify(props.settings)) emit('updateSettings', newSettings.value)
-      if (newSettings.value.wordsQuantity !== props.settings.wordsQuantity ||
-          newSettings.value.addUpperCase !== props.settings.addUpperCase ||
-          newSettings.value.addNumbers !== props.settings.addNumbers ||
-          newSettings.value.addSymbols !== props.settings.addSymbols) emit('updateSettings', newSettings.value)
-    })
-
-    return {
-      newSettings
-    }
-  },
-  data() {
-    return {}
-  },
-  methods: {},
-  computed: {},
-  watch: {},
-  mounted() {
-  },
-}
 </script>
 
 <style lang="scss">
-.settingsBlock {
-  width: 250px;
-  height: 300px;
-  position: absolute;
-  box-sizing: border-box;
-  border: 2px solid #76e0b0;
-  border-radius: 20px;
-  padding: 20px;
-  background: #fffeef;
-  right: 0px;
-  top: 60px;
-}
+    .settingsBlock {
+        width: 240px;
+        height: 240px;
+        position: absolute;
+        box-sizing: border-box;
+        border: 2px solid #76e0b0;
+        border-radius: 20px;
+        padding: 20px;
+        background: #edecea;
+        right: 0px;
+        top: 60px;
+        z-index: 2;
+    }
+
+    .quantityBlock {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+
+      .quantity {
+
+        input {
+          padding: 10px;
+          border: solid 2px #44ada4;
+          width: 66px;
+          height: 33px;
+          border-radius: 20px;
+          box-shadow: inset 0 0.125em 0.75em rgb(69 177 168 / 39%);
+          background: #f7f7f7;
+          font-size: 22px;
+          text-align: right;
+          color: #2c3e50;
+
+          &:focus {
+            box-shadow: none;
+          }
+        }
+      }
+    }
+
+    .switcherBlock {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 10px 0;
+
+        .name {
+
+        }
+
+        .switcher {
+            $track-w: 3em;
+            $track-h: 1.6em;
+            $track-b: .3125em;
+            $thumb-w: .5*($track-w - 2*$track-b);
+            $thumb-h: $track-h - 2*$track-b;
+            $thumb-b: 3px;
+            $c: rgba(#777, .04);
+            $list: $c 0, $c 2px, transparent 0, transparent 5px;
+
+            input {
+                position: absolute;
+                z-index: -1;
+                opacity: 0;
+
+                &:checked + label {
+                    --s: 1
+                }
+            }
+
+            label {
+                --s: 0;
+                display: block;
+                position: relative;
+                --c: #5ff2e6;
+                filter: blur(.5px);
+                cursor: pointer;
+
+                &, &:before {
+                    border: solid $track-b transparent;
+                    width: $track-w;
+                    height: $track-h;
+                    border-radius: .5*$track-h;
+                    box-shadow: inset 0 .125em .75em rgba(#000, .5);
+                    background: repeating-linear-gradient(-45deg, $list) padding-box, repeating-linear-gradient(45deg, $list) padding-box,
+                    linear-gradient(transparent, rgba(#000, .32)) padding-box, linear-gradient(var(--c), var(--c)) padding-box, linear-gradient(#bebebb, #fdfdfc) border-box
+                }
+
+                &:before, &:after {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    content: ''
+                }
+
+                &:before {
+                    margin: -$track-b;
+                    opacity: calc(1 - var(--s));
+                    --c: #fff1d6;
+                    transition: .2s opacity;
+                }
+
+                &:after {
+                    border: solid $thumb-b transparent;
+                    width: $thumb-w;
+                    height: $thumb-h;
+                    border-radius: .5*$thumb-h;
+                    transform: translate(calc(var(--s) * 100%));
+                    box-shadow: 0 2px 9px rgba(#000, .8);
+                    background: linear-gradient(#d1d1d1, #edede9) padding-box, linear-gradient(#fcfcfc, #b2b2b2) border-box;
+                    transition: .2s transform ease-in;
+                }
+            }
+        }
+    }
+
+
 </style>
