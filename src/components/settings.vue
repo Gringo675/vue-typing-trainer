@@ -100,7 +100,21 @@
       .quantity {
 
         input {
-          padding: 10px;
+          border: solid 0.3125em transparent;
+          width: 3em;
+          height: 1.6em;
+          border-radius: 0.8em;
+          box-shadow: inset 0 0.125em 0.75em rgba(0, 0, 0, 0.5);
+          background: repeating-linear-gradient(-45deg, rgba(119, 119, 119, 0.04) 0, rgba(119, 119, 119, 0.04) 2px, transparent 0, transparent 5px) padding-box, repeating-linear-gradient(45deg, rgba(119, 119, 119, 0.04) 0, rgba(119, 119, 119, 0.04) 2px, transparent 0, transparent 5px) padding-box, linear-gradient(transparent, rgba(0, 0, 0, 0.32)) padding-box, linear-gradient(#5ff2e6, #5ff2e6) padding-box, linear-gradient(#bebebb, #fdfdfc) border-box;
+          font-size: 1em;
+          text-align: center;
+          padding: 5px;
+          color: inherit;
+
+          &:focus {
+            background: linear-gradient(#bebebb, #fdfdfc) border-box;
+          }
+          /*padding: 10px;
           border: solid 2px #44ada4;
           width: 66px;
           height: 33px;
@@ -113,7 +127,7 @@
 
           &:focus {
             box-shadow: none;
-          }
+          } */
         }
       }
     }
