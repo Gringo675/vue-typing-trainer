@@ -1,34 +1,43 @@
 <template>
     <div class="settingsBlock">
-      <div class="quantityBlock">
-        <span class="name">Количество</span>
-        <span class="quantity">
+        <div class="quantityBlock">
+            <span class="name">Слов</span>
+            <span class="quantity">
           <input type="text" v-model="newSettings.wordsQuantity">
         </span>
-      </div>
+        </div>
 
         <div class="switcherBlock">
-            <span class="name">Заглавные</span>
+            <span class="name">Текст</span>
             <span class="switcher">
-              <input type="checkbox" id="upperCase" v-model="newSettings.addUpperCase">
-              <label for="upperCase"></label>
-            </span>
-        </div>
-        <div class="switcherBlock">
-            <span class="name">Цифры</span>
-            <span class="switcher">
-              <input type="checkbox" id="numbers" v-model="newSettings.addNumbers">
-              <label for="numbers"></label>
-            </span>
-        </div>
-        <div class="switcherBlock">
-            <span class="name">Символы</span>
-            <span class="switcher">
-              <input type="checkbox" id="symbols" v-model="newSettings.addSymbols">
-              <label for="symbols"></label>
+              <input type="checkbox" id="isText" v-model="newSettings.isText">
+              <label for="isText"></label>
             </span>
         </div>
 
+        <div class="toggledSwitchers" :class="{hide: newSettings.isText}">
+            <div class="switcherBlock">
+                <span class="name">Заглавные</span>
+                <span class="switcher">
+                  <input type="checkbox" id="upperCase" v-model="newSettings.addUpperCase">
+                  <label for="upperCase"></label>
+                </span>
+            </div>
+            <div class="switcherBlock">
+                <span class="name">Цифры</span>
+                <span class="switcher">
+                  <input type="checkbox" id="numbers" v-model="newSettings.addNumbers">
+                  <label for="numbers"></label>
+                </span>
+            </div>
+            <div class="switcherBlock">
+                <span class="name">Символы</span>
+                <span class="switcher">
+                  <input type="checkbox" id="symbols" v-model="newSettings.addSymbols">
+                  <label for="symbols"></label>
+                </span>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -58,7 +67,8 @@
                 if (newSettings.value.wordsQuantity !== props.settings.wordsQuantity ||
                     newSettings.value.addUpperCase !== props.settings.addUpperCase ||
                     newSettings.value.addNumbers !== props.settings.addNumbers ||
-                    newSettings.value.addSymbols !== props.settings.addSymbols) emit('updateSettings', newSettings.value)
+                    newSettings.value.addSymbols !== props.settings.addSymbols ||
+                    newSettings.value.isText !== props.settings.isText) emit('updateSettings', newSettings.value)
             })
 
             return {
@@ -77,9 +87,9 @@
 </script>
 
 <style lang="scss">
+
     .settingsBlock {
         width: 240px;
-        height: 240px;
         position: absolute;
         box-sizing: border-box;
         border: 2px solid #76e0b0;
@@ -91,57 +101,35 @@
         z-index: 2;
     }
 
-    .quantityBlock {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 10px 0;
-
-      .quantity {
-
-        input {
-          border: solid 0.3125em transparent;
-          width: 3em;
-          height: 1.6em;
-          border-radius: 0.8em;
-          box-shadow: inset 0 0.125em 0.75em rgba(0, 0, 0, 0.5);
-          background: repeating-linear-gradient(-45deg, rgba(119, 119, 119, 0.04) 0, rgba(119, 119, 119, 0.04) 2px, transparent 0, transparent 5px) padding-box, repeating-linear-gradient(45deg, rgba(119, 119, 119, 0.04) 0, rgba(119, 119, 119, 0.04) 2px, transparent 0, transparent 5px) padding-box, linear-gradient(transparent, rgba(0, 0, 0, 0.32)) padding-box, linear-gradient(#5ff2e6, #5ff2e6) padding-box, linear-gradient(#bebebb, #fdfdfc) border-box;
-          font-size: 1em;
-          text-align: center;
-          padding: 5px;
-          color: inherit;
-
-          &:focus {
-            background: linear-gradient(#bebebb, #fdfdfc) border-box;
-          }
-          /*padding: 10px;
-          border: solid 2px #44ada4;
-          width: 66px;
-          height: 33px;
-          border-radius: 20px;
-          box-shadow: inset 0 0.125em 0.75em rgb(69 177 168 / 39%);
-          background: #f7f7f7;
-          font-size: 22px;
-          text-align: right;
-          color: #2c3e50;
-
-          &:focus {
-            box-shadow: none;
-          } */
-        }
-      }
-    }
-
-    .switcherBlock {
+    .quantityBlock, .switcherBlock {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin: 10px 0;
+    }
 
-        .name {
+    .quantityBlock {
+        .quantity {
+            input {
+                border: solid 0.3125em transparent;
+                width: 3em;
+                height: 1.6em;
+                border-radius: 0.8em;
+                box-shadow: inset 0 0.125em 0.75em rgba(0, 0, 0, 0.5);
+                background: repeating-linear-gradient(-45deg, rgba(119, 119, 119, 0.04) 0, rgba(119, 119, 119, 0.04) 2px, transparent 0, transparent 5px) padding-box, repeating-linear-gradient(45deg, rgba(119, 119, 119, 0.04) 0, rgba(119, 119, 119, 0.04) 2px, transparent 0, transparent 5px) padding-box, linear-gradient(transparent, rgba(0, 0, 0, 0.32)) padding-box, linear-gradient(#5ff2e6, #5ff2e6) padding-box, linear-gradient(#bebebb, #fdfdfc) border-box;
+                font-size: 1em;
+                text-align: center;
+                padding: 5px;
+                color: inherit;
 
+                &:focus {
+                    background: linear-gradient(#bebebb, #fdfdfc) border-box;
+                }
+            }
         }
+    }
 
+    .switcherBlock {
         .switcher {
             $track-w: 3em;
             $track-h: 1.6em;
@@ -205,6 +193,24 @@
                     transition: .2s transform ease-in;
                 }
             }
+        }
+    }
+
+    .toggledSwitchers {
+        perspective: 500px;
+
+        .switcherBlock {
+            transform: (rotateX(0));
+            opacity: 1;
+            height: 36px;
+            transition: transform .5s linear .2s, opacity .5s linear .2s, height .2s linear;
+        }
+
+        &.hide .switcherBlock {
+            transform: (rotateX(-90deg));
+            opacity: 0;
+            height: 0;
+            transition: transform .5s linear, opacity .5s linear, height .2s linear .5s;
         }
     }
 

@@ -29,6 +29,7 @@
             </span>
       <span class="next" :class="{penalty:nextWord.isPenalty}">{{ nextWord.val }}</span>
     </div>
+    <vWordsBlock :words="words"/>
     <div class="stats">
       <svg viewBox="0 0 36 36" class="circular-chart">
         <path class="circle"
@@ -63,6 +64,7 @@
 import vLoader from './loader'
 import vFinish from './finish'
 import vSettings from './settings'
+import vWordsBlock from './wordsBlock'
 
 import {createWordsArray} from "@/api/words"
 
@@ -70,7 +72,7 @@ import {computed, nextTick, ref, watch, onMounted} from 'vue'
 
 export default {
   name: "main",
-  components: {vLoader, vFinish, vSettings},
+  components: {vLoader, vFinish, vSettings, vWordsBlock},
   props: {},
   setup() {
 
@@ -79,6 +81,7 @@ export default {
       addUpperCase: false,
       addNumbers: false,
       addSymbols: false,
+      isText: false,
       show: false
     })
 
@@ -237,7 +240,8 @@ export default {
       wordsRibbonBlockRef,
       stats,
       settings,
-      onUpdateSettings
+      onUpdateSettings,
+      words
     }
   },
   data() {

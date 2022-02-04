@@ -1,7 +1,8 @@
 export async function createWordsArray(settings) {
 
     // eslint-disable-next-line no-unused-vars
-    const {wordsQuantity, addUpperCase, addNumbers, addSymbols} = settings
+    const {wordsQuantity, isText, addUpperCase, addNumbers, addSymbols} = settings
+    console.log(`isText: ${isText}`);
     let words = [] // result
 
     let localWords = JSON.parse(localStorage.getItem('errors')) // получаем из local storage сохраненные "ошибочные" слова
