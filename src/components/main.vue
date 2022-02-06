@@ -2,22 +2,23 @@
   <vLoader v-if="counter === null"/>
   <div v-else class="main-wrapper">
     <div class="headerBlock">
-      <h1>Type trainer</h1>
-      <span class="settingsButton">
+      <h1>Excelent Typer</h1>
+      <div class="settingsButton">
         <img class="icon" :class="{rotate: settings.show}" @click="settings.show = !settings.show"
              :src="require(`@/assets/settings-icon.png`)"
              alt="">
-          <transition name="pop-up">
-            <vSettings v-if="settings.show"
-                       :settings="settings"
-                       @updateSettings="onUpdateSettings"
-            />
-          </transition>
-      </span>
+        <transition name="pop-up">
+          <vSettings v-if="settings.show"
+                     :settings="settings"
+                     @updateSettings="onUpdateSettings"
+          />
+        </transition>
+      </div>
     </div>
     <div class="inputBlock">
-      <div class="leftHand" :class="{ active: activeWord.hand === 'left' }" ></div>
-      <input type="text" v-model="wordInput" @input="onInput" @keydown="onKeydown" :class="{ error: activeWord.activeError }"
+      <div class="leftHand" :class="{ active: activeWord.hand === 'left' }"></div>
+      <input type="text" v-model="wordInput" @input="onInput" @keydown="onKeydown"
+             :class="{ error: activeWord.activeError }"
              autofocus>
       <div class="rightHand" :class="{ active: activeWord.hand === 'right' }"></div>
     </div>
@@ -29,7 +30,8 @@
             </span>
       <span class="next" :class="{penalty:nextWord.isPenalty}">{{ nextWord.val }}</span>
     </div>
-    <vWordsBlock :words="words"/>
+    <vWordsBlock :words="words"
+                 :counter="counter"/>
     <div class="stats">
       <svg viewBox="0 0 36 36" class="circular-chart">
         <path class="circle"
@@ -41,21 +43,21 @@
         />
         <text x="18" y="20.35" class="wordsLeft">
           <tspan>{{ stats.mainWords - stats.wordsDone }}</tspan>
-          <tspan class="penalty">{{ (stats.penaltyWords>0 ? '+' + stats.penaltyWords : '')}}</tspan>
+          <tspan class="penalty">{{ (stats.penaltyWords > 0 ? '+' + stats.penaltyWords : '') }}</tspan>
         </text>
-        <text x="18" y="30" class="errors">{{ (stats.errors>0 ? stats.errors : '')}}</text>
+        <text x="18" y="30" class="errors">{{ (stats.errors > 0 ? stats.errors : '') }}</text>
       </svg>
     </div>
 
-    <v-finish />
+    <v-finish/>
   </div>
 
-  <div class="debug">
-    DEBUG
-    <div> stats: {{ stats }}</div>
-    <div> counter: {{ counter + 1 }}</div>
-    <button @click="++counter"> ++counter</button>
-  </div>
+  <!--  <div class="debug">-->
+  <!--    DEBUG-->
+  <!--    <div> stats: {{ stats }}</div>-->
+  <!--    <div> counter: {{ counter + 1 }}</div>-->
+  <!--    <button @click="++counter"> ++counter</button>-->
+  <!--  </div>-->
 </template>
 
 <script>
@@ -85,7 +87,7 @@ export default {
       show: false
     })
 
-    onMounted( ()=> {
+    onMounted(() => {
       // читаем настройки из local storage
       let localSettings = JSON.parse(localStorage.getItem('settings'))
       if (localSettings) settings.value = localSettings
@@ -94,7 +96,7 @@ export default {
       createWords()
     })
 
-    const onUpdateSettings = (newSettings)=> {
+    const onUpdateSettings = (newSettings) => {
       // убираем свойство show и сохраняем в local storage
       delete newSettings.show
       localStorage.setItem('settings', JSON.stringify(newSettings))
@@ -105,13 +107,16 @@ export default {
       // console.log(`settings.value: ${JSON.stringify(settings.value)}`);
     }
 
-    const createWords = ()=> {
+    const createWords = () => {
       stats.value = {
         mainWords: 0,
         penaltyWords: 0,
         errors: 0,
         wordsDone: 0
       }
+      wordInput.value = ''
+      words.value = []
+      counter.value = undefined
       createWordsArray(settings.value)
           .then(result => {
             words.value = result
@@ -119,9 +124,9 @@ export default {
             stats.value.mainWords = settings.value.wordsQuantity
             let aaa = ''
             words.value.forEach((word) => {
-                aaa = aaa + word.val + '   '
+              aaa = aaa + word.val + '   '
             })
-            console.log(`words: ${aaa}`);
+            // console.log(`words: ${aaa}`);
           })
     }
 
@@ -145,6 +150,7 @@ export default {
     const wordsRibbonBlockRef = ref(null)
 
     const leftSpaceHandChars = ['н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'р', 'о', 'л', 'д', 'ж', 'э', 'т', 'ь', 'б', 'ю', '7', '8', '9', '0', '-', '=', '+', '_', ')', '(', '*', '?', '/', '\\']
+
     watch(counter, (counter) => {
 
       activeWord.value = words.value[counter] ?? {}
@@ -152,7 +158,7 @@ export default {
       activeWord.value.left = activeWord.value.val
 
       let lastChar = activeWord.value.val?.slice(-2, -1)
-      activeWord.value.hand = ( leftSpaceHandChars.includes(lastChar) ? 'left' : 'right' )
+      activeWord.value.hand = (leftSpaceHandChars.includes(lastChar) ? 'left' : 'right')
 
       // animation
       nextTick(() => {
@@ -167,10 +173,26 @@ export default {
             wordsRibbonBlockRef.value.classList.remove('animate-counter-active')
           }, true);
         }, 0)
+        // перемотка в wordsBlock, чтобы активное слово всегда было на виду
+        setTimeout(() => {
+          let element = document.querySelector('.activeWord')
+          if (!element) return
+          let elmTop = element.getBoundingClientRect().top
+          if (!elmTop) return // если элемент скрыт (пенальти)
+          let parent = element.parentElement
+          let parTop = parent.getBoundingClientRect().top
+          let parScroll = parent.scrollTop
+          let newParScroll = elmTop - parTop + parScroll - 34
+          // console.log(`elmTop: ${elmTop}`)
+          // console.log(`parTop: ${parTop}`)
+          parent.scrollTo({top: newParScroll, behavior: 'smooth'});
+
+        }, 0)
       })
+
       if (counter + 1 === words.value.length) { // конец
         // добавляем "ошибочные" слова в local storage
-        let errors = words.value.filter( item => item.isError && !item.isPenalty ).map(item => item.val)
+        let errors = words.value.filter(item => item.isError && !item.isPenalty).map(item => item.val)
         localStorage.setItem('errors', JSON.stringify(errors))
       }
     })
@@ -184,7 +206,7 @@ export default {
             isPenalty: true
           }
           let addPenArr = []
-          const penQuantity = ( activeWord.value.isPenalty ? 2 : 3) // для "основного" слова добавляем 3 пенальти, для "пенальти" - 2
+          const penQuantity = (activeWord.value.isPenalty ? 2 : 3) // для "основного" слова добавляем 3 пенальти, для "пенальти" - 2
           for (let i = 0; i < penQuantity; i++) {
             addPenArr.push({
               val: activeWord.value.val,
@@ -212,7 +234,7 @@ export default {
         activeWord.value.left = activeWord.value.val.slice(activeWord.value.done.length)
 
         if (activeWord.value.left.length === 0) { // next word
-          ( activeWord.value.isPenalty ? --stats.value.penaltyWords : ++stats.value.wordsDone )
+          (activeWord.value.isPenalty ? --stats.value.penaltyWords : ++stats.value.wordsDone)
           wordInput.value = ''
           ++counter.value
         }
@@ -258,20 +280,31 @@ export default {
 <style lang="scss">
 .main-wrapper {
   width: 1000px;
+  min-height: 100vh;
   margin: auto;
   display: flex;
   flex-direction: column;
+  background: #88c2c8;
 
   .headerBlock {
     display: flex;
     align-content: center;
     justify-content: space-between;
     align-items: center;
+    margin: 20px 20px 40px;
+
+    h1 {
+      font-size: 58px;
+      font-style: italic;
+      font-weight: bold;
+      color: #8f07e4;
+    }
 
     .settingsButton {
       position: relative;
 
       .icon {
+        display: block;
         cursor: pointer;
         transform: rotate(0);
         transition: transform .3s linear;
@@ -290,10 +323,17 @@ export default {
 
     input, input:focus {
       width: 270px;
-      font-size: 22px;
+      font-size: 24px;
       padding: 5px 10px;
-      border: 2px solid #44f2ff;
+      border: 2px solid #6ba6ac;
       border-radius: 15px;
+      background: #d4fbff;
+      color: inherit;
+
+      &.error {
+        background: pink;
+        box-shadow: 0 0 14px 8px pink;
+      }
     }
 
     .leftHand, .rightHand {
@@ -301,27 +341,25 @@ export default {
       height: 40px;
       margin: 0 20px;
       border-radius: 50%;
-      background: #fffaed;
+      background: #8ec6cc;
 
       &.active {
-        background: #5bf3ff;
+        background: #ace6ec;
+        box-shadow: 0 0 4px 0 #ace6ec;
       }
     }
 
 
-    .error {
-      background: pink;
-      box-shadow: 0 0 14px 8px pink;
-    }
   }
 
   .wordsRibbon {
     margin: 20px 0 20px 370px;
     transform: translateX(calc(var(--prevWordWidth) * -1));
     white-space: nowrap;
+    text-shadow: 0 0 1px #818181;
 
     .prev, .done {
-      color: #87d282;
+      color: #9bff9a;
     }
 
     .prev {
@@ -338,7 +376,12 @@ export default {
     }
 
     .penalty {
-      background: yellow;
+      border-radius: 5px;
+      box-shadow: inset 0px 0px 30px 0px #faef6c;
+
+      .done {
+        color: #03c809;
+      }
     }
 
     &.animate-counter-enter {
@@ -416,13 +459,16 @@ export default {
 
 
 }
+
 .rotate-y-enter-active, .rotate-y-leave-active {
   transition: transform .3s linear, opacity .3s linear;
 }
+
 .rotate-y-enter-from, .rotate-y-leave-to {
   transform: rotateY(90deg);
   opacity: .3;
 }
+
 .rotate-y-enter-to, .rotate-y-leave-from {
   transform: rotateY(0);
   opacity: 1;
@@ -431,12 +477,14 @@ export default {
 .pop-up-enter-active, .pop-up-leave-active {
   transition: all .3s linear;
 }
+
 .pop-up-enter-from, .pop-up-leave-to {
   transform: translateY(-40px) scale(0.1) skewY(-30deg);
   transform-origin: 100% 0;
   opacity: .1;
 
 }
+
 .pop-up-enter-to, .pop-up-leave-from {
   transform: none;
   transform-origin: 100% 0;

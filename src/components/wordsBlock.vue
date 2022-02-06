@@ -1,9 +1,10 @@
 <template>
     <div class="wordsBlock">
-        <span v-for="word in props.words" :key="word.val" :class="{done: word.left === '',
+        <span v-for="(word, i) in props.words" :key="word.val" :class="{done: word.left === '',
                                                                    wasError: word.wasError,
                                                                    isError: word.isError,
-                                                                   hidden: word.isPenalty}">
+                                                                   hidden: word.isPenalty,
+                                                                   activeWord: i === props.counter}">
             {{word.val}}
         </span>
     </div>
@@ -18,7 +19,10 @@
         props: {
             words: {
                 type: Array,
-            }
+            },
+          counter: {
+            type: Number,
+          }
         },
 
         setup(props) {
@@ -41,24 +45,48 @@
 
 <style lang="scss">
     .wordsBlock {
-        width: 800px;
-        border: 1px solid red;
-        border-radius: 10px;
-        padding: 10px;
-        align-self: center;
-        max-height: 300px;
-        overflow: auto;
+      width: 800px;
+      height: 200px;
+      border: 2px solid #6ba6ac;
+      box-shadow: inset 0px 0px 4px 1px #88c2c8;
+      border-radius: 10px;
+      padding: 16px;
+      line-height: 1.4em;
+      background: #ace6ec;
+      align-self: center;
+      overflow: auto;
+      font-size: 18px;
+
+      &::-webkit-scrollbar {
+        width: 20px;
+        background-color: #d4fbff;
+        border-radius: 8px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        border-radius: 6px;
+        background-color: #88c2c8;
+      }
+
+      .activeWord {
+        text-shadow: 0 0 1px #686868;
+        -webkit-text-stroke: 0.02em #8c8c8c;
+      }
 
         .wasError {
-            color: #ccaf1d;
+            color: #7c6c1b;
         }
 
         .done {
-            color: #5bf3ff;
+          color: #00a680;
+          text-shadow: 0 0 1px #909090;
 
             &.isError {
                 color: palevioletred;
             }
+          &.wasError.isError {
+            color: red;
+          }
         }
 
         .hidden {

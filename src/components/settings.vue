@@ -89,16 +89,16 @@
 <style lang="scss">
 
     .settingsBlock {
-        width: 240px;
-        position: absolute;
-        box-sizing: border-box;
-        border: 2px solid #76e0b0;
-        border-radius: 20px;
-        padding: 20px;
-        background: #edecea;
-        right: 0px;
-        top: 60px;
-        z-index: 2;
+      width: 240px;
+      position: absolute;
+      border: 2px solid #5a9ca3;
+      box-shadow: 4px -6px 7px 1px #43aab6;
+      border-radius: 20px;
+      padding: 20px;
+      background: #f4efe3;
+      right: 0px;
+      top: 60px;
+      z-index: 2;
     }
 
     .quantityBlock, .switcherBlock {
@@ -106,6 +106,10 @@
         justify-content: space-between;
         align-items: center;
         margin: 10px 0;
+
+      .name {
+        color: #026873;
+      }
     }
 
     .quantityBlock {
