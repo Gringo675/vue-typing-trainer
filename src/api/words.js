@@ -1,10 +1,13 @@
+/* eslint-disable no-unused-vars,no-unused-labels */
 export async function createWordsArray(settings) {
 
     // eslint-disable-next-line no-unused-vars
     const {wordsQuantity, isText, addUpperCase, addNumbers, addSymbols} = settings
-    console.log(`isText: ${isText}`);
     let words = [] // result
-
+    if (isText) {
+        words = await getText(wordsQuantity)
+        return words
+    }
     let localWords = JSON.parse(localStorage.getItem('errors')) // получаем из local storage сохраненные "ошибочные" слова
     if (localWords) {
         words = localWords.map(word => {
@@ -129,4 +132,47 @@ function randomInteger(min, max) {
     // случайное число от min до (max+1)
     let rand = min + Math.random() * (max + 1 - min);
     return Math.floor(rand);
+}
+
+// eslint-disable-next-line no-unused-vars
+async function getText(wordsQuantity) {
+    const {default: text} = await import('./text')
+    // разбиваем на абзацы
+    // let regexp = /^[^a-zA-Z]{200,1000}$/gm // от 200 до 1000 символов, без латинских
+    let regexp = /^[^a-zA-Z\n]{200,500}?$/gm
+    let parArray = text.match(regexp)
+    // разбиваем на слова
+    let words = []
+    let usedIndexes = [] // массив из индексов использованных абзацев, чтобы не было повторений
+
+    // let par = parArray[0]
+    // console.log(`par: ${par}`);
+    // regexp = /.*?[\s.]/g // любые символы и пробел или точка
+    // let wordsArray = par.match(regexp)
+    // words.push(...wordsArray)
+    // console.log(`words: ${JSON.stringify(words)}`);
+
+    while (words.length < wordsQuantity) {
+        // берем случайный параграф из ранее полученного массива
+        let index = randomInteger(0, parArray.length -1)
+        if (usedIndexes.some(usedIndex => usedIndex === index)) continue // если уже был такой индекс, запускаем итерацию заново, чтобы получить новое случайное число
+        usedIndexes.push(index)
+        let par = parArray[index] + '\n' // добавляем пробел к концу абзаца
+        par = par.replace(/–/g,'-') // заменяем длинное тире на обычное
+        console.log(`par: ${par}`);
+        regexp = /.*?(\s|\.\s)/g // любые символы и пробел или точка и пробел
+        let wordsArray = par.match(regexp)
+        words.push(...wordsArray)
+    }
+
+    // parArray.forEach((item) => {
+    //     console.log(`length: ${JSON.stringify(item.length)}`);
+    //     console.log(`item: ${item}`);
+    // })
+    // console.log(`par: ${JSON.stringify(par)}`);
+
+    words = words.map((word)=> {return {val: word}})
+    console.log(`words: ${JSON.stringify(words)}`);
+    console.log(`length: ${words.length}`);
+    return words
 }

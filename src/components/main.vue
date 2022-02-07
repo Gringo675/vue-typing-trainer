@@ -43,6 +43,7 @@
         />
         <text x="18" y="20.35" class="wordsLeft">
           <tspan>{{ stats.mainWords - stats.wordsDone }}</tspan>
+          <tspan style="font-size: .4em">/{{ stats.mainWords }}</tspan>
           <tspan class="penalty">{{ (stats.penaltyWords > 0 ? '+' + stats.penaltyWords : '') }}</tspan>
         </text>
         <text x="18" y="30" class="errors">{{ (stats.errors > 0 ? stats.errors : '') }}</text>
@@ -121,11 +122,11 @@ export default {
           .then(result => {
             words.value = result
             counter.value = 0
-            stats.value.mainWords = settings.value.wordsQuantity
-            let aaa = ''
-            words.value.forEach((word) => {
-              aaa = aaa + word.val + '   '
-            })
+            stats.value.mainWords = words.value.length
+            // let aaa = ''
+            // words.value.forEach((word) => {
+            //   aaa = aaa + word.val + '   '
+            // })
             // console.log(`words: ${aaa}`);
           })
     }
