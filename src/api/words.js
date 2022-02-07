@@ -157,10 +157,10 @@ async function getText(wordsQuantity) {
         let index = randomInteger(0, parArray.length -1)
         if (usedIndexes.some(usedIndex => usedIndex === index)) continue // если уже был такой индекс, запускаем итерацию заново, чтобы получить новое случайное число
         usedIndexes.push(index)
-        let par = parArray[index] + '\n' // добавляем пробел к концу абзаца
+        let par = parArray[index] + '¶' // добавляем символ параграфа к концу абзаца
         par = par.replace(/–/g,'-') // заменяем длинное тире на обычное
         console.log(`par: ${par}`);
-        regexp = /.*?(\s|\.\s)/g // любые символы и пробел или точка и пробел
+        regexp = /.*?(\s|\.\s|\.¶)/g // любые символы и (пробел или точка и пробел или точка и конец параграфа
         let wordsArray = par.match(regexp)
         words.push(...wordsArray)
     }

@@ -250,6 +250,12 @@ export default {
         wordInput.value += ' '
         onInput()
       }
+      // обрабатываем нажатие Enter (заменяем на символ параграфа)
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        wordInput.value += '¶'
+        onInput()
+      }
     }
 
     return {
