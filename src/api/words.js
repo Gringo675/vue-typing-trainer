@@ -162,6 +162,10 @@ async function getText(wordsQuantity) {
         console.log(`par: ${par}`);
         regexp = /.*?(\s|\.\s|\.¶)/g // любые символы и (пробел или точка и пробел или точка и конец параграфа
         let wordsArray = par.match(regexp)
+        wordsArray = wordsArray.map((word, i)=> {return {
+                                                                val: word,
+                                                                 isParEnd: (i === wordsArray.length - 1)
+                                                            }})
         words.push(...wordsArray)
     }
 
@@ -171,7 +175,7 @@ async function getText(wordsQuantity) {
     // })
     // console.log(`par: ${JSON.stringify(par)}`);
 
-    words = words.map((word)=> {return {val: word}})
+    // words = words.map((word)=> {return {val: word}})
     console.log(`words: ${JSON.stringify(words)}`);
     console.log(`length: ${words.length}`);
     return words

@@ -23,12 +23,12 @@
       <div class="rightHand" :class="{ active: activeWord.hand === 'right' }"></div>
     </div>
     <div class="wordsRibbon" ref="wordsRibbonBlockRef">
-      <span class="prev" :class="{penalty:prevWord.isPenalty}">{{ prevWord.val }}</span>
-      <span class="active" :class="{penalty:activeWord.isPenalty}">
+      <span class="prev" :class="{penalty:prevWord.isPenalty, parEnd: prevWord.isParEnd}">{{ prevWord.val }}</span>
+      <span class="active" :class="{penalty:activeWord.isPenalty, parEnd: activeWord.isParEnd}">
               <span class="done"> {{ activeWord.done }} </span>
               <span class="left"> {{ activeWord.left }} </span>
             </span>
-      <span class="next" :class="{penalty:nextWord.isPenalty}">{{ nextWord.val }}</span>
+      <span class="next" :class="{penalty:nextWord.isPenalty, parEnd: nextWord.isParEnd}">{{ nextWord.val }}</span>
     </div>
     <vWordsBlock :words="words"
                  :counter="counter"/>
@@ -389,6 +389,10 @@ export default {
       .done {
         color: #03c809;
       }
+    }
+
+    .parEnd {
+      padding-right: 30px;
     }
 
     &.animate-counter-enter {

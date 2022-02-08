@@ -8,7 +8,7 @@
                           activeWord: i === props.counter}">
                 {{ word.val }}
           </span>
-          <br v-if="word.val.slice(-1) === '¶'" />
+          <br v-if="word.isParEnd" />
     </template>
   </div>
 </template>
