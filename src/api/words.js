@@ -1,9 +1,10 @@
-/* eslint-disable no-unused-vars,no-unused-labels */
+/* eslint-disable no-unused-vars,no-unused-labels,no-unreachable */
 export async function createWordsArray(settings) {
 
     // eslint-disable-next-line no-unused-vars
     const {wordsQuantity, isText, addUpperCase, addNumbers, addSymbols} = settings
     let words = [] // result
+    // return words
     if (isText) {
         words = await getText(wordsQuantity)
         return words
@@ -138,45 +139,32 @@ function randomInteger(min, max) {
 async function getText(wordsQuantity) {
     const {default: text} = await import('./text')
     // разбиваем на абзацы
-    // let regexp = /^[^a-zA-Z]{200,1000}$/gm // от 200 до 1000 символов, без латинских
-    let regexp = /^[^a-zA-Z\n]{200,500}?$/gm
+    let regexp = /^[^a-zA-Z\n]{100,1000}?$/gm // от 100 до 1000 символов, без латинских
     let parArray = text.match(regexp)
     // разбиваем на слова
     let words = []
     let usedIndexes = [] // массив из индексов использованных абзацев, чтобы не было повторений
-
-    // let par = parArray[0]
-    // console.log(`par: ${par}`);
-    // regexp = /.*?[\s.]/g // любые символы и пробел или точка
-    // let wordsArray = par.match(regexp)
-    // words.push(...wordsArray)
-    // console.log(`words: ${JSON.stringify(words)}`);
-
     while (words.length < wordsQuantity) {
+        if (usedIndexes.length === parArray.length) break // чтобы избежать рекурсии
         // берем случайный параграф из ранее полученного массива
         let index = randomInteger(0, parArray.length -1)
         if (usedIndexes.some(usedIndex => usedIndex === index)) continue // если уже был такой индекс, запускаем итерацию заново, чтобы получить новое случайное число
-        usedIndexes.push(index)
         let par = parArray[index] + '¶' // добавляем символ параграфа к концу абзаца
         par = par.replace(/–/g,'-') // заменяем длинное тире на обычное
+        par = par.replace(/(«|»)/g,'"') // заменяем кавычки
         console.log(`par: ${par}`);
-        regexp = /.*?(\s|\.\s|\.¶)/g // любые символы и (пробел или точка и пробел или точка и конец параграфа
+        regexp = /.*?[\s¶]/g // любые символы и [пробел или конец абзаца]
         let wordsArray = par.match(regexp)
+        console.log(`wordsArray: ${wordsArray}`);
         wordsArray = wordsArray.map((word, i)=> {return {
                                                                 val: word,
                                                                  isParEnd: (i === wordsArray.length - 1)
                                                             }})
         words.push(...wordsArray)
+        usedIndexes.push(index)
     }
 
-    // parArray.forEach((item) => {
-    //     console.log(`length: ${JSON.stringify(item.length)}`);
-    //     console.log(`item: ${item}`);
-    // })
-    // console.log(`par: ${JSON.stringify(par)}`);
-
-    // words = words.map((word)=> {return {val: word}})
-    console.log(`words: ${JSON.stringify(words)}`);
-    console.log(`length: ${words.length}`);
+    // console.log(`words: ${JSON.stringify(words)}`);
+    // console.log(`length: ${words.length}`);
     return words
 }

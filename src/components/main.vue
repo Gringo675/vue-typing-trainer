@@ -1,6 +1,5 @@
 <template>
-  <vLoader v-if="counter === null"/>
-  <div v-else class="main-wrapper">
+  <div class="main-wrapper">
     <div class="headerBlock">
       <h1>Excelent Typer</h1>
       <div class="settingsButton">
@@ -17,7 +16,7 @@
     </div>
     <div class="inputBlock">
       <div class="leftHand" :class="{ active: activeWord.hand === 'left' }"></div>
-      <input type="text" v-model="wordInput" @input="onInput" @keydown="onKeydown"
+      <input type="text" v-model="wordInput" @input="onInput" @keydown="onKeydown" ref="inputRef"
              :class="{ error: activeWord.activeError }"
              autofocus>
       <div class="rightHand" :class="{ active: activeWord.hand === 'right' }"></div>
@@ -30,27 +29,9 @@
             </span>
       <span class="next" :class="{penalty:nextWord.isPenalty, parEnd: nextWord.isParEnd}">{{ nextWord.val }}</span>
     </div>
+    <vStatsCircle :stats="stats"/>
     <vWordsBlock :words="words"
                  :counter="counter"/>
-    <div class="stats">
-      <svg viewBox="0 0 36 36" class="circular-chart">
-        <path class="circle"
-              :class="{penaltyActive: stats.penaltyWords>0}"
-              :stroke-dasharray='(stats.wordsDone/stats.mainWords)*100 + ", 100"'
-              d="M18 2.0845
-      a 15.9155 15.9155 0 0 1 0 31.831
-      a 15.9155 15.9155 0 0 1 0 -31.831"
-        />
-        <text x="18" y="20.35" class="wordsLeft">
-          <tspan>{{ stats.mainWords - stats.wordsDone }}</tspan>
-          <tspan style="font-size: .4em">/{{ stats.mainWords }}</tspan>
-          <tspan class="penalty">{{ (stats.penaltyWords > 0 ? '+' + stats.penaltyWords : '') }}</tspan>
-        </text>
-        <text x="18" y="30" class="errors">{{ (stats.errors > 0 ? stats.errors : '') }}</text>
-      </svg>
-    </div>
-
-    <v-finish/>
   </div>
 
   <!--  <div class="debug">-->
@@ -64,18 +45,16 @@
 <script>
 /* eslint-disable no-unused-vars */
 
-import vLoader from './loader'
-import vFinish from './finish'
 import vSettings from './settings'
 import vWordsBlock from './wordsBlock'
-
+import vStatsCircle from './statsCircle'
 import {createWordsArray} from "@/api/words"
 
 import {computed, nextTick, ref, watch, onMounted} from 'vue'
 
 export default {
   name: "main",
-  components: {vLoader, vFinish, vSettings, vWordsBlock},
+  components: {vSettings, vWordsBlock, vStatsCircle},
   props: {},
   setup() {
 
@@ -123,6 +102,7 @@ export default {
             words.value = result
             counter.value = 0
             stats.value.mainWords = words.value.length
+            inputRef.value.focus()
             // let aaa = ''
             // words.value.forEach((word) => {
             //   aaa = aaa + word.val + '   '
@@ -148,6 +128,7 @@ export default {
       wordsDone: 0
     })
 
+    const inputRef = ref(null)
     const wordsRibbonBlockRef = ref(null)
 
     const leftSpaceHandChars = ['н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'р', 'о', 'л', 'д', 'ж', 'э', 'т', 'ь', 'б', 'ю', '7', '8', '9', '0', '-', '=', '+', '_', ')', '(', '*', '?', '/', '\\']
@@ -267,6 +248,7 @@ export default {
       onInput,
       onKeydown,
       wordsRibbonBlockRef,
+      inputRef,
       stats,
       settings,
       onUpdateSettings,
@@ -383,8 +365,10 @@ export default {
     }
 
     .penalty {
-      border-radius: 5px;
-      box-shadow: inset 0px 0px 30px 0px #faef6c;
+      border-radius: 12px;
+      padding: 0 8px;
+      background: #fdff93;
+      margin-right: 5px;
 
       .done {
         color: #03c809;
@@ -433,40 +417,7 @@ export default {
     }
   }
 
-  .stats {
-    .circular-chart {
-      display: block;
-      margin: 10px auto;
-      width: 200px;
-    }
 
-    .circle {
-      stroke: #4CC790;
-      fill: #c5ffe5;
-      stroke-width: 1.4;
-      stroke-linecap: round;
-
-      &.penaltyActive {
-        stroke: yellow;
-      }
-    }
-
-    .wordsLeft {
-      fill: #8371a6;
-      font-size: .5em;
-      text-anchor: middle;
-
-      .penalty {
-        fill: #eebf54;
-      }
-    }
-
-    .errors {
-      fill: #e75576;
-      font-size: .4em;
-      text-anchor: middle;
-    }
-  }
 
 
 }

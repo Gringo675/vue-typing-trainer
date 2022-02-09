@@ -21,7 +21,7 @@ export default {
   font-family: 'Play', sans-serif;
   font-size: 22px;
   color: #2c3e50;
-  background-color: #026873;
+  background-color: #6bb3ba;
   background-image: linear-gradient(90deg, rgba(255,255,255,.07) 50%, transparent 50%),
   linear-gradient(90deg, rgba(255,255,255,.13) 50%, transparent 50%),
   linear-gradient(90deg, transparent 50%, rgba(255,255,255,.17) 50%),
