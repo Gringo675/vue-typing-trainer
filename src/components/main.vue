@@ -29,7 +29,8 @@
             </span>
       <span class="next" :class="{penalty:nextWord.isPenalty, parEnd: nextWord.isParEnd}">{{ nextWord.val }}</span>
     </div>
-    <vStatsCircle :stats="stats"/>
+    <vStatsCircle :stats="stats"
+                  @reload="onReload"/>
     <vWordsBlock :words="words"
                  :counter="counter"/>
   </div>
@@ -85,6 +86,10 @@ export default {
       // пересоздаем words
       createWords()
       // console.log(`settings.value: ${JSON.stringify(settings.value)}`);
+    }
+
+    const onReload = () => {
+      createWords()
     }
 
     const createWords = () => {
@@ -252,6 +257,7 @@ export default {
       stats,
       settings,
       onUpdateSettings,
+      onReload,
       words
     }
   },
@@ -416,24 +422,6 @@ export default {
       }
     }
   }
-
-
-
-
-}
-
-.rotate-y-enter-active, .rotate-y-leave-active {
-  transition: transform .3s linear, opacity .3s linear;
-}
-
-.rotate-y-enter-from, .rotate-y-leave-to {
-  transform: rotateY(90deg);
-  opacity: .3;
-}
-
-.rotate-y-enter-to, .rotate-y-leave-from {
-  transform: rotateY(0);
-  opacity: 1;
 }
 
 .pop-up-enter-active, .pop-up-leave-active {

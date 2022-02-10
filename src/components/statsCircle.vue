@@ -1,7 +1,7 @@
 <template>
     <div class="statsCircle">
         statsCircle {{stat}}
-        <div class="circleWrapper">
+        <div class="circleWrapper" :class="{loading: !stat.mainWords}">
             <svg viewBox="0 0 36 36" class="circular-chart">
                 <path class="circle"
                       :class="{penaltyActive: stat.penaltyWords>0}"
@@ -21,26 +21,23 @@
                 <template v-else>
                     <text x="18" y="21" class="load">Loading...</text>
                 </template>
-                <!--            <g transform="translate(30,-5)" class="reload">-->
-                <!--                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>-->
-                <!--                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>-->
-                <!--            </g>-->
-
-
             </svg>
-            <div class="reload">
-                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="#5be769" viewBox="0 0 16 16" >
-                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-                </svg>
-            </div>
+            <transition name="reload-anim">
+                <div class="reload" @click="emit('reload')"
+                     v-if="stat.mainWords && stat.wordsDone === stat.mainWords && stat.penaltyWords === 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="#5be769" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                    </svg>
+                </div>
+            </transition>
         </div>
 
     </div>
 </template>
 
 <script>
-    import { toRef } from 'vue'
+    import {toRef} from 'vue'
 
     export default {
         name: "statsCircle",
@@ -51,11 +48,12 @@
             },
         },
 
-        setup(props) {
+        setup(props, {emit}) {
             //let wordsArray = ref(props.words)
             const stat = toRef(props, 'stats')
             return {
-                stat
+                stat,
+                emit
             }
         },
 
@@ -78,6 +76,10 @@
             position: relative;
             margin: 10px auto;
             width: 200px;
+
+            &.loading {
+                animation: loader 2s infinite linear;
+            }
 
             .circular-chart {
 
@@ -124,15 +126,41 @@
 
             .reload {
                 position: absolute;
-                right: 0px;
-                top: 1px;
+                right: 0;
+                top: 0;
                 cursor: pointer;
+                transform: rotate(0);
+                transition: transform .3s linear;
 
+                &:hover {
+                    transform: rotate(180deg);
+                }
             }
         }
 
+        @keyframes loader {
+            from,
+            to {
+                transform: scale(1);
+            }
+            25%,
+            75% {
+                transform: scale(.8);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+    }
 
+    .reload-anim-enter-active, .reload-anim-leave-active {
+        transition: all 10s linear;
+    }
+    .reload-anim-enter-from, .reload-anim-leave-to {
+        transform: translateX(70px);
+    }
 
-
+    .reload-anim-enter-to, .reload-anim-leave-from {
+        transform: translateX(0);
     }
 </style>
