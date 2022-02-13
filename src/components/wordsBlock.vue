@@ -1,5 +1,5 @@
 <template>
-  <div class="wordsBlock">
+  <div class="wordsBlock" :class="{loading: !props.words.length}">
     <template v-for="(word, i) in props.words" :key="word.val">
           <span  :class="{done: word.left === '',
                           wasError: word.wasError,
@@ -49,7 +49,8 @@ export default {
 <style lang="scss">
 .wordsBlock {
   width: 800px;
-  height: 200px;
+  max-height: calc(100vh - 480px);
+  transition: max-height .5s ease-out;
   border: 2px solid #6ba6ac;
   box-shadow: inset 0px 0px 4px 1px #88c2c8;
   border-radius: 10px;
@@ -59,6 +60,11 @@ export default {
   align-self: center;
   overflow: auto;
   font-size: 18px;
+  margin-bottom: 20px;
+
+  &.loading {
+    max-height: 50px;
+  }
 
   &::-webkit-scrollbar {
     width: 20px;

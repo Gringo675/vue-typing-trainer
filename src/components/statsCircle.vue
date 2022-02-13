@@ -1,8 +1,7 @@
 <template>
     <div class="statsCircle">
-        statsCircle {{stat}}
-        <div class="circleWrapper" :class="{loading: !stat.mainWords}">
-            <svg viewBox="0 0 36 36" class="circular-chart">
+        <div class="circleWrapper">
+            <svg viewBox="0 0 36 36" class="circular-chart" :class="{loading: !stat.mainWords}">
                 <path class="circle"
                       :class="{penaltyActive: stat.penaltyWords>0}"
                       :stroke-dasharray='(stat.wordsDone/stat.mainWords)*100 + ", 100"'
@@ -77,11 +76,12 @@
             margin: 10px auto;
             width: 200px;
 
-            &.loading {
-                animation: loader 2s infinite linear;
+            .loading {
+                animation: loader 3s infinite linear;
             }
 
             .circular-chart {
+              display: block;
 
                 .circle {
                     stroke: #4CC790;
@@ -154,13 +154,15 @@
     }
 
     .reload-anim-enter-active, .reload-anim-leave-active {
-        transition: all 10s linear;
+        transition: all .3s linear !important;
     }
     .reload-anim-enter-from, .reload-anim-leave-to {
-        transform: translateX(70px);
+        transform: translateX(40px) !important;
+      opacity: .2;
     }
 
     .reload-anim-enter-to, .reload-anim-leave-from {
-        transform: translateX(0);
+        transform: translateX(0) !important;
+      opacity: 1;
     }
 </style>
