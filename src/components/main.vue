@@ -136,7 +136,7 @@ export default {
     const inputRef = ref(null)
     const wordsRibbonBlockRef = ref(null)
 
-    const leftSpaceHandChars = ['н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'р', 'о', 'л', 'д', 'ж', 'э', 'т', 'ь', 'б', 'ю', '7', '8', '9', '0', '-', '=', '+', '_', ')', '(', '*', '?', '/', '\\']
+    const leftSpaceHandChars = ['н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'р', 'о', 'л', 'д', 'ж', 'э', 'т', 'ь', 'б', 'ю', '7', '8', '9', '0', '-', '=', '+', '_', ')', '(', '*', '?', '/', '\\', ',', '.']
 
     watch(counter, (counter) => {
 
@@ -178,9 +178,11 @@ export default {
       })
 
       if (counter + 1 === words.value.length) { // конец
-        // добавляем "ошибочные" слова в local storage
-        let errors = words.value.filter(item => item.isError && !item.isPenalty).map(item => item.val)
-        localStorage.setItem('errors', JSON.stringify(errors))
+        // добавляем "ошибочные" слова в local storage, если не текст
+        if (!settings.value.isText) {
+          let errors = words.value.filter(item => item.isError && !item.isPenalty).map(item => item.val)
+          localStorage.setItem('errors', JSON.stringify(errors))
+        }
       }
     })
 

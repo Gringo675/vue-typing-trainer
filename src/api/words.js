@@ -152,6 +152,7 @@ async function getText(wordsQuantity) {
         let par = parArray[index] + '¶' // добавляем символ параграфа к концу абзаца
         par = par.replace(/–/g,'-') // заменяем длинное тире на обычное
         par = par.replace(/(«|»)/g,'"') // заменяем кавычки
+        par = par.replace(/…/g,'...') // заменяем символ троеточия на три точки
         console.log(`par: ${par}`);
         regexp = /.*?[\s¶]/g // любые символы и [пробел или конец абзаца]
         let wordsArray = par.match(regexp)

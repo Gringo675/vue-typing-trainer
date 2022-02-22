@@ -18,7 +18,7 @@
                     <text x="18" y="30" class="errors">{{ (stat.errors > 0 ? stat.errors : '') }}</text>
                 </template>
                 <template v-else>
-                    <text x="18" y="21" class="load">Loading...</text>
+                    <text x="18" y="20" class="load">Loading...</text>
                 </template>
             </svg>
             <transition name="reload-anim">
