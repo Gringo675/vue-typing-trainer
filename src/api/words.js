@@ -153,10 +153,10 @@ async function getText(wordsQuantity) {
         par = par.replace(/–/g,'-') // заменяем длинное тире на обычное
         par = par.replace(/(«|»)/g,'"') // заменяем кавычки
         par = par.replace(/…/g,'...') // заменяем символ троеточия на три точки
-        console.log(`par: ${par}`);
+        // console.log(`par: ${par}`);
         regexp = /.*?[\s¶]/g // любые символы и [пробел или конец абзаца]
         let wordsArray = par.match(regexp)
-        console.log(`wordsArray: ${wordsArray}`);
+        // console.log(`wordsArray: ${wordsArray}`);
         wordsArray = wordsArray.map((word, i)=> {return {
                                                                 val: word,
                                                                  isParEnd: (i === wordsArray.length - 1)

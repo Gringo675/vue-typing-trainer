@@ -196,6 +196,7 @@ export default {
           }
           let addPenArr = []
           const penQuantity = (activeWord.value.isPenalty ? 2 : 3) // для "основного" слова добавляем 3 пенальти, для "пенальти" - 2
+          // const penQuantity = 0
           for (let i = 0; i < penQuantity; i++) {
             addPenArr.push({
               val: activeWord.value.val,
@@ -232,6 +233,13 @@ export default {
     }
 
     const onKeydown = (event) => {
+      // wildcard на Ctrl (вставляет "правильный" символ)
+      if (event.key === 'Control') {
+        event.preventDefault()
+        const nextSymb = activeWord.value.left.slice(0,1)
+        wordInput.value += nextSymb
+        onInput()
+      }
       // обрабатываем нажатие Tab (заменяем на пробел)
       if (event.key === 'Tab') {
         event.preventDefault()
