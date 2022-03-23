@@ -49,7 +49,8 @@ export default {
 <style lang="scss">
 .wordsBlock {
   width: 800px;
-  max-height: calc(100vh - 480px);
+  //max-height: calc(100vh - 480px);
+  height: 450px;
   transition: max-height .5s ease-out;
   border: 2px solid #6ba6ac;
   box-shadow: inset 0px 0px 4px 1px #88c2c8;
@@ -59,7 +60,7 @@ export default {
   background: #ace6ec;
   align-self: center;
   overflow: auto;
-  font-size: 18px;
+  font-size: 20px;
   margin-bottom: 20px;
 
   &.loading {
@@ -91,7 +92,7 @@ export default {
     text-shadow: 0 0 1px #909090;
 
     &.isError {
-      color: palevioletred;
+      color: #be852d;
     }
 
     &.wasError.isError {

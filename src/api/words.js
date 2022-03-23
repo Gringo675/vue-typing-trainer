@@ -2,10 +2,14 @@
 export async function createWordsArray(settings) {
 
     // eslint-disable-next-line no-unused-vars
-    const {wordsQuantity, isText, addUpperCase, addNumbers, addSymbols} = settings
+    const {wordsQuantity, isText, isStory, storyIndex, addUpperCase, addNumbers, addSymbols} = settings
     let words = [] // result
     // return words
     if (isText) {
+        if (isStory) {
+            words = await getStory(storyIndex)
+            return words
+        }
         words = await getText(wordsQuantity)
         return words
     }
@@ -147,20 +151,22 @@ async function getText(wordsQuantity) {
     while (words.length < wordsQuantity) {
         if (usedIndexes.length === parArray.length) break // чтобы избежать рекурсии
         // берем случайный параграф из ранее полученного массива
-        let index = randomInteger(0, parArray.length -1)
+        let index = randomInteger(0, parArray.length - 1)
         if (usedIndexes.some(usedIndex => usedIndex === index)) continue // если уже был такой индекс, запускаем итерацию заново, чтобы получить новое случайное число
         let par = parArray[index] + '¶' // добавляем символ параграфа к концу абзаца
-        par = par.replace(/–/g,'-') // заменяем длинное тире на обычное
-        par = par.replace(/(«|»)/g,'"') // заменяем кавычки
-        par = par.replace(/…/g,'...') // заменяем символ троеточия на три точки
+        par = par.replace(/–/g, '-') // заменяем длинное тире на обычное
+        par = par.replace(/(«|»)/g, '"') // заменяем кавычки
+        par = par.replace(/…/g, '...') // заменяем символ троеточия на три точки
         // console.log(`par: ${par}`);
         regexp = /.*?[\s¶]/g // любые символы и [пробел или конец абзаца]
         let wordsArray = par.match(regexp)
         // console.log(`wordsArray: ${wordsArray}`);
-        wordsArray = wordsArray.map((word, i)=> {return {
-                                                                val: word,
-                                                                 isParEnd: (i === wordsArray.length - 1)
-                                                            }})
+        wordsArray = wordsArray.map((word, i) => {
+            return {
+                val: word,
+                isParEnd: (i === wordsArray.length - 1)
+            }
+        })
         words.push(...wordsArray)
         usedIndexes.push(index)
     }
@@ -168,4 +174,48 @@ async function getText(wordsQuantity) {
     // console.log(`words: ${JSON.stringify(words)}`);
     // console.log(`length: ${words.length}`);
     return words
+}
+
+async function getStory(storyIndex) {
+    // возвращает 2 параграфа истории
+    // storyIndex - с какого параграфа начать
+
+    const {default: text} = await import('./story')
+    // разбиваем на абзацы
+    // /^[^a-zA-Z\n]{100,1000}?$/gm
+    let regexp = /^.+?$/gm
+    let parArray = text.match(regexp)
+    // console.log(`length: ${parArray.length}`);
+    // console.log(`parArray: ${JSON.stringify(parArray)}`);
+    let par = parArray[storyIndex] + '¶' // берем нужный параграф и добавляем символ конца
+    par = par.replace(/–/g, '-') // заменяем длинное тире на обычное
+    par = par.replace(/(«|»)/g, '"') // заменяем кавычки
+    par = par.replace(/…/g, '...') // заменяем символ троеточия на три точки
+    // разбиваем на слова
+    regexp = /.*?[\s¶]/g // любые символы и [пробел или конец абзаца]
+    let wordsArray = par.match(regexp)
+    // console.log(`wordsArray: ${JSON.stringify(wordsArray)}`);
+    wordsArray = wordsArray.map((word, i) => {
+        return {
+            val: word,
+            isParEnd: (i === wordsArray.length - 1)
+        }
+    })
+    // "для красоты" добавляем следующий абзац, разбитый на 2 части: первое слово и все остальное
+    const nextPar = parArray[storyIndex + 1] + '¶'
+    // console.log(`nextPar: ${nextPar}`);
+    const spaceInd = nextPar.indexOf(' ') + 1
+    let firstWord, otherWords
+    if (spaceInd > 1) {
+        firstWord = nextPar.slice(0, spaceInd)
+        otherWords = nextPar.slice(spaceInd)
+        // console.log(`firstWord: ${firstWord}`);
+        // console.log(`otherWords: ${otherWords}`);
+    } else {
+        firstWord = nextPar
+        otherWords = ''
+    }
+    wordsArray.push({val: firstWord}, {val: otherWords})
+
+    return wordsArray
 }

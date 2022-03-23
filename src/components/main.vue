@@ -29,18 +29,12 @@
             </span>
       <span class="next" :class="{penalty:nextWord.isPenalty, parEnd: nextWord.isParEnd}">{{ nextWord.val }}</span>
     </div>
-    <vStatsCircle :stats="stats"
+    <vStatsCircle v-if="!settings.isText || (settings.isText && !settings.isStory)"
+                  :stats="stats"
                   @reload="onReload"/>
     <vWordsBlock :words="words"
                  :counter="counter"/>
   </div>
-
-  <!--  <div class="debug">-->
-  <!--    DEBUG-->
-  <!--    <div> stats: {{ stats }}</div>-->
-  <!--    <div> counter: {{ counter + 1 }}</div>-->
-  <!--    <button @click="++counter"> ++counter</button>-->
-  <!--  </div>-->
 </template>
 
 <script>
@@ -51,7 +45,7 @@ import vWordsBlock from './wordsBlock'
 import vStatsCircle from './statsCircle'
 import {createWordsArray} from "@/api/words"
 
-import {computed, nextTick, ref, watch, onMounted} from 'vue'
+import {computed, nextTick, onMounted, ref, watch} from 'vue'
 
 export default {
   name: "main",
@@ -65,6 +59,8 @@ export default {
       addNumbers: false,
       addSymbols: false,
       isText: false,
+      isStory: false,
+      storyIndex: 0,
       show: false
     })
 
@@ -140,6 +136,12 @@ export default {
 
     watch(counter, (counter) => {
 
+      // если закончился параграф в storyMod, создаем новый
+      if (settings.value.isText && settings.value.isStory && Number(counter) === words.value.length-2) {
+        ++settings.value.storyIndex
+        onUpdateSettings(settings.value)
+      }
+
       activeWord.value = words.value[counter] ?? {}
       activeWord.value.done = ''
       activeWord.value.left = activeWord.value.val
@@ -160,21 +162,23 @@ export default {
             wordsRibbonBlockRef.value.classList.remove('animate-counter-active')
           }, true);
         }, 0)
-        // перемотка в wordsBlock, чтобы активное слово всегда было на виду
-        setTimeout(() => {
-          let element = document.querySelector('.activeWord')
-          if (!element) return
-          let elmTop = element.getBoundingClientRect().top
-          if (!elmTop) return // если элемент скрыт (пенальти)
-          let parent = element.parentElement
-          let parTop = parent.getBoundingClientRect().top
-          let parScroll = parent.scrollTop
-          let newParScroll = elmTop - parTop + parScroll - 34
-          // console.log(`elmTop: ${elmTop}`)
-          // console.log(`parTop: ${parTop}`)
-          parent.scrollTo({top: newParScroll, behavior: 'smooth'});
+        // перемотка в wordsBlock, чтобы активное слово всегда было на виду, если не сториМод
+        if (!settings.value.isText || (settings.value.isText && !settings.value.isStory)) {
+          setTimeout(() => {
+            let element = document.querySelector('.activeWord')
+            if (!element) return
+            let elmTop = element.getBoundingClientRect().top
+            if (!elmTop) return // если элемент скрыт (пенальти)
+            let parent = element.parentElement
+            let parTop = parent.getBoundingClientRect().top
+            let parScroll = parent.scrollTop
+            let newParScroll = elmTop - parTop + parScroll - 34
+            // console.log(`elmTop: ${elmTop}`)
+            // console.log(`parTop: ${parTop}`)
+            parent.scrollTo({top: newParScroll, behavior: 'smooth'});
 
-        }, 0)
+          }, 0)
+        }
       })
 
       if (counter + 1 === words.value.length) { // конец
@@ -189,36 +193,33 @@ export default {
     const onInput = () => {
       const isError = !activeWord.value.val.startsWith(wordInput.value)
       if (isError) {
-        if (!activeWord.value.isError) { // первая ошибка в слове, добавляем пенальти
-          let penaltyWord = {
-            val: activeWord.value.val,
-            isPenalty: true
-          }
-          let addPenArr = []
-          const penQuantity = (activeWord.value.isPenalty ? 2 : 3) // для "основного" слова добавляем 3 пенальти, для "пенальти" - 2
-          // const penQuantity = 0
-          for (let i = 0; i < penQuantity; i++) {
-            addPenArr.push({
-              val: activeWord.value.val,
-              isPenalty: true
-            })
-          }
-          words.value.splice(counter.value + 1, 0, ...addPenArr);
+        if (!activeWord.value.isError) { // первая ошибка в слове
           activeWord.value.isError = true
-          stats.value.penaltyWords = stats.value.penaltyWords + penQuantity
           ++stats.value.errors
+          // добавляем пенальти, если не сториМод
+          if (!settings.value.isText || (settings.value.isText && !settings.value.isStory)) {
+             let addPenArr = []
+            const penQuantity = (activeWord.value.isPenalty ? 2 : 3) // для "основного" слова добавляем 3 пенальти, для "пенальти" - 2
+            for (let i = 0; i < penQuantity; i++) {
+              addPenArr.push({
+                val: activeWord.value.val,
+                isPenalty: true
+              })
+            }
+            words.value.splice(counter.value + 1, 0, ...addPenArr)
+            stats.value.penaltyWords = stats.value.penaltyWords + penQuantity
 
-          // animation
-          wordsRibbonBlockRef.value.classList.add('animate-penalty-enter')
-          setTimeout(() => {
-            wordsRibbonBlockRef.value.classList.remove('animate-penalty-enter')
-            wordsRibbonBlockRef.value.classList.add('animate-penalty-active')
-            wordsRibbonBlockRef.value.addEventListener("transitionend", () => {
-              wordsRibbonBlockRef.value.classList.remove('animate-penalty-active')
-            }, true);
-          }, 0)
+            // animation
+            wordsRibbonBlockRef.value.classList.add('animate-penalty-enter')
+            setTimeout(() => {
+              wordsRibbonBlockRef.value.classList.remove('animate-penalty-enter')
+              wordsRibbonBlockRef.value.classList.add('animate-penalty-active')
+              wordsRibbonBlockRef.value.addEventListener("transitionend", () => {
+                wordsRibbonBlockRef.value.classList.remove('animate-penalty-active')
+              }, true);
+            }, 0)
+          }
         }
-
       } else {
         activeWord.value.done = wordInput.value
         activeWord.value.left = activeWord.value.val.slice(activeWord.value.done.length)
@@ -233,10 +234,10 @@ export default {
     }
 
     const onKeydown = (event) => {
-      // wildcard на Ctrl (вставляет "правильный" символ)
+      // wildcard на Ctrl (для пропуска активного слова)
       if (event.key === 'Control') {
         event.preventDefault()
-        const nextSymb = activeWord.value.left.slice(0,1)
+        const nextSymb = activeWord.value.left
         wordInput.value += nextSymb
         onInput()
       }
