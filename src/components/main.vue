@@ -60,7 +60,6 @@ export default {
       addSymbols: false,
       isText: false,
       isStory: false,
-      storyIndex: 0,
       show: false
     })
 
@@ -136,10 +135,9 @@ export default {
 
     watch(counter, (counter) => {
 
-      // если закончился параграф в storyMod, создаем новый
+      // если закончился параграф в storyMod, пересоздаем
       if (settings.value.isText && settings.value.isStory && Number(counter) === words.value.length-2) {
-        ++settings.value.storyIndex
-        onUpdateSettings(settings.value)
+        createWords()
       }
 
       activeWord.value = words.value[counter] ?? {}

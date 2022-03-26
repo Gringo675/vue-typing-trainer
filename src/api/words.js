@@ -1,13 +1,16 @@
 /* eslint-disable no-unused-vars,no-unused-labels,no-unreachable */
+
+let storyData = undefined // = { storyArr, lastPar }
+
 export async function createWordsArray(settings) {
 
     // eslint-disable-next-line no-unused-vars
-    const {wordsQuantity, isText, isStory, storyIndex, addUpperCase, addNumbers, addSymbols} = settings
+    const {wordsQuantity, isText, isStory, addUpperCase, addNumbers, addSymbols} = settings
     let words = [] // result
     // return words
     if (isText) {
         if (isStory) {
-            words = await getStory(storyIndex)
+            words = await getStory()
             return words
         }
         words = await getText(wordsQuantity)
@@ -176,23 +179,24 @@ async function getText(wordsQuantity) {
     return words
 }
 
-async function getStory(storyIndex) {
+async function getStory() {
     // возвращает 2 параграфа истории
-    // storyIndex - с какого параграфа начать
 
-    const {default: text} = await import('./story')
-    // разбиваем на абзацы
-    // /^[^a-zA-Z\n]{100,1000}?$/gm
-    let regexp = /^.+?$/gm
-    let parArray = text.match(regexp)
-    // console.log(`length: ${parArray.length}`);
-    // console.log(`parArray: ${JSON.stringify(parArray)}`);
-    let par = parArray[storyIndex] + '¶' // берем нужный параграф и добавляем символ конца
+    if (storyData === undefined) {
+        await setStoryData() // первый раз
+    } else {
+        ++storyData.lastPar // обрабатываем следующий параграф
+        saveStoryPar() // сохраняет номер параграфа в базе
+    }
+
+    const { storyArr, lastPar: storyPar } = storyData
+
+    let par = storyArr[storyPar] + '¶' // берем нужный параграф и добавляем символ конца
     par = par.replace(/–/g, '-') // заменяем длинное тире на обычное
     par = par.replace(/(«|»)/g, '"') // заменяем кавычки
     par = par.replace(/…/g, '...') // заменяем символ троеточия на три точки
     // разбиваем на слова
-    regexp = /.*?[\s¶]/g // любые символы и [пробел или конец абзаца]
+    const regexp = /.*?[\s¶]/g // любые символы и [пробел или конец абзаца]
     let wordsArray = par.match(regexp)
     // console.log(`wordsArray: ${JSON.stringify(wordsArray)}`);
     wordsArray = wordsArray.map((word, i) => {
@@ -202,7 +206,7 @@ async function getStory(storyIndex) {
         }
     })
     // "для красоты" добавляем следующий абзац, разбитый на 2 части: первое слово и все остальное
-    const nextPar = parArray[storyIndex + 1] + '¶'
+    const nextPar = storyArr[storyPar + 1] + '¶'
     // console.log(`nextPar: ${nextPar}`);
     const spaceInd = nextPar.indexOf(' ') + 1
     let firstWord, otherWords
@@ -218,4 +222,42 @@ async function getStory(storyIndex) {
     wordsArray.push({val: firstWord}, {val: otherWords})
 
     return wordsArray
+}
+
+async function setStoryData() {
+
+    const url = 'https://chelinstrument.ru/api?app=typer&method=getData'
+
+    const post = {
+        id: '111222333',
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(post)
+    });
+
+    storyData = await response.json();
+}
+
+async function saveStoryPar() {
+    // сохраняет номер параграфа в базе
+
+    const url = 'https://chelinstrument.ru/api?app=typer&method=setParagraphNumber'
+
+    const post = {
+        id: '111222333',
+        par: storyData.lastPar
+    };
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(post)
+    });
 }
