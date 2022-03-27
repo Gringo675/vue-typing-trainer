@@ -1,11 +1,12 @@
 <script>
 
 // eslint-disable-next-line no-unused-vars
+import vEditStory from './editStory'
 import {onBeforeUnmount, ref} from 'vue'
 
 export default {
   name: "settings",
-  components: {},
+  components: {vEditStory},
   props: {
     settings: {
       type: Object,
@@ -29,8 +30,11 @@ export default {
           newSettings.value.isStory !== props.settings.isStory) emit('updateSettings', newSettings.value)
     })
 
+    let showEditStory = ref(false)
+
     return {
-      newSettings
+      newSettings,
+      showEditStory
     }
   },
   data() {
@@ -68,6 +72,9 @@ export default {
               <label for="isStory"></label>
             </span>
     </div>
+    <div class="switcherBlock" :class="{hide: !newSettings.isText || !newSettings.isStory}">
+      <button class="edit" @click="showEditStory = !showEditStory">Редактировать</button>
+    </div>
 
     <div class="switcherBlock" :class="{hide: newSettings.isText}">
       <span class="name">Заглавные</span>
@@ -90,6 +97,9 @@ export default {
                   <label for="symbols"></label>
                 </span>
     </div>
+    <Teleport to="body">
+      <v-edit-story v-if="showEditStory" />
+    </Teleport>
   </div>
 </template>
 
@@ -212,6 +222,16 @@ export default {
         background: linear-gradient(#bebebb, #fdfdfc) border-box;
       }
     }
+  }
+
+  button.edit {
+    margin: 0 auto;
+    padding: 10px;
+    border: 1px solid #d9d9d7;
+    border-radius: 10px;
+    font-size: 18px;
+    background: #7ec7c1;
+    cursor: pointer;
   }
 }
 </style>

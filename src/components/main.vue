@@ -43,7 +43,7 @@
 import vSettings from './settings'
 import vWordsBlock from './wordsBlock'
 import vStatsCircle from './statsCircle'
-import {createWordsArray} from "@/api/words"
+import {createWordsArray, nextStoryPar} from "@/api/words"
 
 import {computed, nextTick, onMounted, ref, watch} from 'vue'
 
@@ -135,9 +135,11 @@ export default {
 
     watch(counter, (counter) => {
 
-      // если закончился параграф в storyMod, пересоздаем
+      // если закончился параграф в storyMod
       if (settings.value.isText && settings.value.isStory && Number(counter) === words.value.length-2) {
-        createWords()
+        nextStoryPar().then(()=>{
+          createWords()
+        })
       }
 
       activeWord.value = words.value[counter] ?? {}

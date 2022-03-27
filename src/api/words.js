@@ -184,12 +184,9 @@ async function getStory() {
 
     if (storyData === undefined) {
         await setStoryData() // первый раз
-    } else {
-        ++storyData.lastPar // обрабатываем следующий параграф
-        saveStoryPar() // сохраняет номер параграфа в базе
     }
 
-    const { storyArr, lastPar: storyPar } = storyData
+    const {storyArr, lastPar: storyPar} = storyData
 
     let par = storyArr[storyPar] + '¶' // берем нужный параграф и добавляем символ конца
     par = par.replace(/–/g, '-') // заменяем длинное тире на обычное
@@ -243,8 +240,10 @@ async function setStoryData() {
     storyData = await response.json();
 }
 
-async function saveStoryPar() {
-    // сохраняет номер параграфа в базе
+export async function nextStoryPar() {
+    // инкременируем номер параграфа и сохраняем его в базе
+
+    ++storyData.lastPar
 
     const url = 'https://chelinstrument.ru/api?app=typer&method=setParagraphNumber'
 
