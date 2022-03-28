@@ -137,9 +137,8 @@ export default {
 
       // если закончился параграф в storyMod
       if (settings.value.isText && settings.value.isStory && Number(counter) === words.value.length-2) {
-        nextStoryPar().then(()=>{
-          createWords()
-        })
+        nextStoryPar()
+        createWords()
       }
 
       activeWord.value = words.value[counter] ?? {}

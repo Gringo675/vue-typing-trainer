@@ -27,14 +27,17 @@ export default {
           newSettings.value.addNumbers !== props.settings.addNumbers ||
           newSettings.value.addSymbols !== props.settings.addSymbols ||
           newSettings.value.isText !== props.settings.isText ||
-          newSettings.value.isStory !== props.settings.isStory) emit('updateSettings', newSettings.value)
+          newSettings.value.isStory !== props.settings.isStory ||
+          isStoryChanged.value) emit('updateSettings', newSettings.value)
     })
 
     let showEditStory = ref(false)
+    let isStoryChanged = ref(false)
 
     return {
       newSettings,
-      showEditStory
+      showEditStory,
+      isStoryChanged
     }
   },
   data() {
@@ -98,7 +101,8 @@ export default {
                 </span>
     </div>
     <Teleport to="body">
-      <v-edit-story v-if="showEditStory" />
+      <v-edit-story v-if="showEditStory" @closeEditStory="showEditStory = false"
+                                          @reCreateStory="isStoryChanged = true"/>
     </Teleport>
   </div>
 </template>

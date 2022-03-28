@@ -240,10 +240,23 @@ async function setStoryData() {
     storyData = await response.json();
 }
 
-export async function nextStoryPar() {
+export function nextStoryPar() {
     // инкременируем номер параграфа и сохраняем его в базе
 
     ++storyData.lastPar
+    saveStoryParInBase()
+
+}
+
+export function newStoryPar(newPar) {
+    // устанавливаем новое значения параграфа и сохраняем его в базе
+
+    storyData.lastPar = newPar
+    saveStoryParInBase()
+
+}
+
+function saveStoryParInBase() {
 
     const url = 'https://chelinstrument.ru/api?app=typer&method=setParagraphNumber'
 
@@ -259,4 +272,9 @@ export async function nextStoryPar() {
         },
         body: JSON.stringify(post)
     });
+}
+
+export async function getStoryData () {
+    if (storyData === undefined) await setStoryData()
+    return storyData
 }
