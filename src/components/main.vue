@@ -233,8 +233,8 @@ export default {
     }
 
     const onKeydown = (event) => {
-      // wildcard на Ctrl (для пропуска активного слова)
-      if (event.key === 'Control') {
+      // wildcard на ControlRight (для пропуска активного слова)
+      if (event.code === 'ControlRight') {
         event.preventDefault()
         const nextSymb = activeWord.value.left
         wordInput.value += nextSymb

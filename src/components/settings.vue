@@ -100,7 +100,7 @@ export default {
                   <label for="symbols"></label>
                 </span>
     </div>
-    <Teleport to="body">
+    <Teleport to="#app">
       <v-edit-story v-if="showEditStory" @closeEditStory="showEditStory = false"
                                           @reCreateStory="isStoryChanged = true"/>
     </Teleport>

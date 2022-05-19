@@ -1,15 +1,18 @@
 <script setup>
-import { getStoryData, newStoryPar } from "@/api/words"
-import {ref, onMounted, nextTick, defineEmits} from 'vue'
+import {getStoryData, newStoryPar, newStoryText} from "@/api/words"
+import {defineEmits, nextTick, onMounted, ref} from 'vue'
 
 const emit = defineEmits(['closeEditStory', 'reCreateStory'])
 
-let storyData = ref()
-let activePar = ref()
+const storyData = ref()
+const activePar = ref()
+const oldText = ref()
+const newText = ref()
 
-onMounted(async ()=> {
+onMounted(async () => {
   storyData.value = await getStoryData()
   activePar.value = storyData.value.lastPar
+  oldText.value = newText.value = storyData.value.storyArr.join('\n')
   // скроллим текст, чтобы активный блок был видимым
   await nextTick()
   const element = document.querySelector('.choosePar .active')
@@ -25,13 +28,22 @@ onMounted(async ()=> {
 
 })
 
-const handleOK = ()=> {
-  if (activePar.value !== storyData.value.lastPar) { // нужно сохранить новое значение активного параграфа
-    newStoryPar(activePar.value)
+const handleOK = () => {
+  if (activePar.value !== storyData.value.lastPar || oldText.value !== newText.value) { // есть изменения
+    if (oldText.value !== newText.value) { // изменили текст
+      newStoryText(newText.value)
+      newStoryPar(0) // нужно сбросить параграф
+    } else {  // изменили параграф
+      newStoryPar(activePar.value)
+    }
     emit('reCreateStory') // пересоздать Words
-    emit('closeEditStory')
   }
+
+  emit('closeEditStory')
 }
+
+const currentTab = ref('choosePar')
+
 </script>
 
 <template>
@@ -41,14 +53,26 @@ const handleOK = ()=> {
         <div class="title">storyMod</div>
         <div class="btn-close" @click="$emit('closeEditStory')"></div>
       </div>
+      <div class="modal-nav-bar">
+        <div class="nav-button" @click="currentTab='choosePar'" :class="{activeTab: currentTab === 'choosePar'}">Выбрать
+          параграф
+        </div>
+        <div class="nav-button" @click="currentTab='changeText'" :class="{activeTab: currentTab === 'changeText'}">
+          Изменить текст
+        </div>
+      </div>
       <div class="modal-body">
-        <div class="choosePar">
+        <div class="choosePar" v-show="currentTab === 'choosePar'">
           <template v-if="storyData !== undefined">
-            <div v-for="(par, index) in storyData.storyArr" :key="index" class="par" :class="{active: index === activePar}"
-                  @click="activePar = index">
+            <div v-for="(par, index) in storyData.storyArr" :key="index" class="par"
+                 :class="{active: index === activePar}"
+                 @click="activePar = index">
               {{ par }}
             </div>
           </template>
+        </div>
+        <div class="changeText" v-show="currentTab === 'changeText'">
+          <textarea v-model.lazy="newText"></textarea>
         </div>
       </div>
       <div class="modal-footer">
@@ -112,6 +136,32 @@ const handleOK = ()=> {
       }
     }
 
+    .modal-nav-bar {
+      background: #fcece4;
+      border-bottom: 1px solid #debe93;
+      padding: 10px 20px 0;
+
+
+      .nav-button {
+        float: left;
+        background: #fef0dd;
+        padding: 10px;
+        border: 1px solid #debe93;
+        margin: 0 5px -1px;
+        cursor: pointer;
+        border-top-right-radius: 10px;
+        border-top-left-radius: 10px;
+        color: #88b6c5;
+
+        &.activeTab {
+          cursor: auto;
+          border-bottom-color: transparent;
+          background: #ffe5c1;
+          color: #2c3e50;
+        }
+      }
+    }
+
     & .modal-body {
       padding: 20px;
       background: #ffe5c1;
@@ -156,5 +206,18 @@ const handleOK = ()=> {
     }
   }
 
+}
+
+.changeText {
+
+  textarea {
+    outline: none;
+    border: none;
+    resize: none;
+    padding: 10px;
+    width: 100%;
+    height: 400px;
+    font-size: 14px;
+  }
 }
 </style>

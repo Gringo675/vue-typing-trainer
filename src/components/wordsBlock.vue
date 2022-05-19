@@ -1,5 +1,5 @@
 <template>
-  <div class="wordsBlock" :class="{loading: !props.words.length}">
+  <div class="wordsBlock" :class="{loading: !props.words.length, activeError: words[counter]?.activeError}">
     <template v-for="(word, i) in props.words" :key="word.val">
           <span  :class="{done: word.left === '',
                           wasError: word.wasError,
@@ -65,6 +65,10 @@ export default {
 
   &.loading {
     max-height: 50px;
+  }
+
+  &.activeError {
+    background: pink;
   }
 
   &::-webkit-scrollbar {

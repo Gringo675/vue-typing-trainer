@@ -203,7 +203,12 @@ async function getStory() {
         }
     })
     // "для красоты" добавляем следующий абзац, разбитый на 2 части: первое слово и все остальное
-    const nextPar = storyArr[storyPar + 1] + '¶'
+    let nextPar = ''
+    if (storyPar !== storyArr.length-1) {
+        nextPar = storyArr[storyPar + 1] + '¶'
+    } else {
+        nextPar = 'КОНЕЦ';
+    }
     // console.log(`nextPar: ${nextPar}`);
     const spaceInd = nextPar.indexOf(' ') + 1
     let firstWord, otherWords
@@ -243,9 +248,10 @@ async function setStoryData() {
 export function nextStoryPar() {
     // инкременируем номер параграфа и сохраняем его в базе
 
-    ++storyData.lastPar
-    saveStoryParInBase()
-
+    if (storyData.lastPar < storyData.storyArr.length-1) { // если есть куда прибавлять
+        ++storyData.lastPar
+        saveStoryParInBase()
+    }
 }
 
 export function newStoryPar(newPar) {
@@ -254,6 +260,28 @@ export function newStoryPar(newPar) {
     storyData.lastPar = newPar
     saveStoryParInBase()
 
+}
+
+export function newStoryText(newText) {
+    // устанавливаем новый текст и сохраняем его в базе
+
+    const storyArr = newText.match(/^.+?$/gm) // разбиваем на абзацы
+    storyData.storyArr = storyArr
+
+    const url = 'https://chelinstrument.ru/api?app=typer&method=setNewText'
+
+    const post = {
+        id: '111222333',
+        textArrJSON: JSON.stringify(storyArr)
+    };
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(post)
+    });
 }
 
 function saveStoryParInBase() {
